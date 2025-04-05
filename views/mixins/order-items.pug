@@ -1,0 +1,15 @@
+mixin orderItems(items)
+    if items && items.length > 0
+        each item in items
+            article.cart__item
+                div.cart__content
+                    img(src=`${item.product.imageUrl}`, alt=item.product.name, class="cart__img")
+                    h5= item.product.name
+                    div.cart__quantity
+                        span.cart__quantity-count= item.quantity + ' шт'
+                    div.cart__prices
+                        span.cart__price= `${item.product.price} ₽`
+                        span.cart__price= `${item.product.price * item.quantity} ₽`
+                hr.cart__divider
+    else
+        p В заказе нет товаров.

@@ -1,0 +1,62 @@
+extends layouts/main
+
+include mixins/products-mini
+
+block content
+    section.catalog
+        h1.catalog__title= pageTitle
+
+        nav.categories-nav
+            ul.categories-nav__list
+                li.categories-nav__item
+                    a(href="/catalog" class="categories-nav__link") Все категории
+                if categories && categories.length > 0
+                    each category in categories
+                        li.categories-nav__item
+                            a(
+                                href=`/catalog?category=${category.name}${query && query.sort ? `&sort=${query.sort}` : ''}${query && query.minPrice ? `&minPrice=${query.minPrice}` : ''}${query && query.maxPrice ? `&maxPrice=${query.maxPrice}` : ''}`
+                                class="categories-nav__link"
+                            )= category.name
+                else
+                    p Категории не найдены.
+
+        div.categories-nav__filter
+            div.sort-options
+                form.price-filter__sort-options(action="/catalog" method="GET")
+                    input(type="hidden" name="category" value=query && query.category ? query.category : '')
+                    input(type="hidden" name="minPrice" value=query && query.minPrice ? query.minPrice : defaultMinPrice)
+                    input(type="hidden" name="maxPrice" value=query && query.maxPrice ? query.maxPrice : defaultMaxPrice)
+                    select(name="sort" onchange="this.form.submit()")
+                        option(value="" disabled selected) Сортировка
+                        option(value="newest" selected=query && query.sort === 'newest') Сперва новые
+                        option(value="oldest" selected=query && query.sort === 'oldest') Сперва старые
+                        option(value="price_asc" selected=query && query.sort === 'price_asc') Дешевле
+                        option(value="price_desc" selected=query && query.sort === 'price_desc') Дороже
+
+
+            div.price-filter
+                form.price-filter__form(action="/catalog" method="GET")
+                    input(type="hidden" name="category" value=query && query.category ? query.category : '')
+                    input(type="hidden" name="sort" value=query && query.sort ? query.sort : '')
+                    label(for="minPrice")
+                    input(type="number" id="minPrice" name="minPrice" value=query && query.minPrice ? query.minPrice : defaultMinPrice)
+                    label(for="maxPrice")
+                    input(type="number" id="maxPrice" name="maxPrice" value=query && query.maxPrice ? query.maxPrice : defaultMaxPrice)
+                    button(type="submit") OK
+
+        if products && products.length > 0
+            p Найдено: #{totalProducts}
+        else
+            p
+
+
+        div.catalog__container(id="products-container")
+            if products && products.length > 0
+                each product in products
+                    +product-mini(product)
+            else
+                p Товаров пока нет.
+
+        script(src="/js/favorite-heart.js")
+        script(src="/js/toggleCart.js")
+

@@ -1,0 +1,18 @@
+extends ../../layouts/main
+include ../../mixins/backButton
+
+block content
+    section.categories
+        div.florist__navigation
+            +backButton('/florist/categories', 'Назад')
+
+        h1.categories__title= pageTitle
+
+        form.categories__form(action="/florist/categories/add" method="POST")
+            label
+                span Название
+                input(type="text" name="name" required)
+            label
+                span Описание (опционально)
+                textarea(name="description")
+            button.categories__button(type="submit") Добавить

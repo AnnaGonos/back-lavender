@@ -1,0 +1,26 @@
+extends ../../layouts/main
+include ../../mixins/backButton
+
+block content
+    section.categories
+        div.florist__navigation
+            +backButton('/florist', 'Назад')
+            +backButton('/florist/products', 'Товары')
+
+        h1.categories__title= pageTitle
+
+        a(href="/florist/categories/add" class="categories__button") Добавить новую категорию
+
+        if categories && categories.length > 0
+            div.categories__container
+                each category in categories
+                    div.categories__item
+                        h5= category.name
+                        span= category.description || 'Нет описания'
+                        a(href=`/florist/categories/${category.id}/edit` class="categories__edit-button") Редактировать
+                        form.categories__delete-form(action=`/florist/categories/${category.id}?_method=DELETE` method="POST")
+                            button.categories__delete-button(type="submit") Удалить
+        else
+            p Категорий пока нет.
+
+

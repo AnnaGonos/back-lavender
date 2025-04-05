@@ -1,0 +1,37 @@
+extends ../layouts/main
+include ../mixins/cart-item
+include ../mixins/order-items
+
+block content
+    section.cart
+        h1.cart__title Заказ №#{order.id}
+        div.order__details
+            div.order__info
+                div.order__info-item
+                    span Статус заказа
+                    span #{getOrderStatus(order.status)}
+                div.order__info-item
+                    span Тип доставки
+                    span #{getDeliveryType(order.deliveryType)}
+                div.order__info-item
+                    span Дата доставки
+                    span #{order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) : 'Не указана'}
+                div.order__info-item
+                    span Интервал доставки
+                    span #{order.deliveryInterval || 'Не указан'}
+                div.order__info-item
+                    span Адрес доставки
+                    span #{order.deliveryAddress || 'Не указан'}
+                div.order__info-item
+                    span Итоговая сумма
+                    span #{`${order.totalAmount || 0} ₽`}
+
+            h2 Содержимое заказа
+
+            div.order__container
+                +orderItems(order.items)
+
+
+
+
+

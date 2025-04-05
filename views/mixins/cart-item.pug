@@ -1,0 +1,23 @@
+mixin cart-item(item)
+    article.cart__item
+        .cart__content
+            img.cart__img(src=item.product.imageUrl || '/images/placeholder.jpg', alt=item.product.name)
+
+            h5= item.product.name
+            .cart__quantity
+                img.cart__icon(src="/images/icons/dash-lg.svg", alt="", data-product-id=item.product.id, class="decrease-btn")
+                span.cart__quantity-count= item.quantity
+                img.cart__icon(src="/images/icons/plus-lg.svg", alt="", data-product-id=item.product.id, class="increase-btn")
+            .cart__prices
+                if item.product.discount
+                    span.cart__price.cart__price--sale= item.product.price + ' ₽'
+                    span.cart__price= item.product.discount + ' ₽'
+                else
+                    span.cart__price= item.product.price + ' ₽'
+            .cart__actions
+                img.cart__icon(src="/images/icons/x-lg.svg", alt="", data-product-id=item.product.id)
+        hr.cart__divider
+
+
+    script(src="/js/cartActions.js" async)
+    script(src="/js/updateCartItem.js" async)

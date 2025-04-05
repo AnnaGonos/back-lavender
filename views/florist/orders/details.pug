@@ -1,0 +1,60 @@
+extends ../../layouts/main
+include ../../mixins/cart-item
+include ../../mixins/order-items
+include ../../mixins/backButton
+
+block content
+    section.cart
+        h1.page-title Заказ №#{order.id}
+        div.florist__navigation
+            +backButton('/florist/orders', 'Назад')
+
+        div.order__details
+            div.order__info
+                div.order__info-item
+                    span Статус заказа
+                    span #{getOrderStatus(order.status)}
+                    form.order__form(action=`/florist/orders/${order.id}/update-status`, method="POST")
+                        select.order__select(name="status")
+                            option(value="created", selected=order.status === 'created') Оформлен
+                            option(value="confirmed", selected=order.status === 'confirmed') Подтвержден
+                            option(value="assembled", selected=order.status === 'assembled') Собран
+                            option(value="delivered", selected=order.status === 'delivered') Доставлен
+                            option(value="cancelled", selected=order.status === 'cancelled') Отменен
+                        button.cart__button(type="submit") Изменить статус
+
+                div.order__info-item
+                    span Тип доставки
+                    span #{getDeliveryType(order.deliveryType)}
+                div.order__info-item
+                    span Дата доставки
+                    span #{order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('ru-RU', { day: 'numeric',month: 'long' }) : 'Не указана'}
+                div.order__info-item
+                    span Интервал доставки
+                    span #{order.deliveryInterval || 'Не указан'}
+                div.order__info-item
+                    span Адрес доставки
+                    span #{order.deliveryAddress || 'Не указан'}
+                div.order__info-item
+                    span Итоговая сумма
+                    span #{`${order.totalAmount || 0} ₽`}
+
+            h2 Содержимое заказа
+            div.order__container.order__container--florist
+                if order.items && order.items.length > 0
+                    each item in order.items
+                        form(action=`/florist/orders/${order.id}/update-item/${item.id}`, method="POST", class="cart__item-form")
+                            div.cart__content
+                                img(src=`${item.product.imageUrl}`, alt=item.product.name, class="cart__img")
+                                h5= item.product.name
+                                div.cart__quantity
+                                    label(for=`quantity-${item.id}`) Количество:
+                                    input(type="number", name="quantity", id=`quantity-${item.id}`, value=item.quantity, min="1")
+                                div.cart__prices
+                                    span.cart__price= `${item.product.price} ₽`
+                                    span.cart__price= `${item.product.price * item.quantity} ₽`
+                                button.cart__button(type="submit") Сохранить изменения
+                                a(href=`/florist/orders/${order.id}/remove-item/${item.id}`, class="btn btn-danger") Удалить товар
+
+            form(action=`/florist/orders/${order.id}/delete`, method="POST")
+                button.cart__button(type="submit", class="btn btn-danger") Удалить заказ полностью

@@ -1,0 +1,37 @@
+extends ../layouts/main
+
+block content
+    section.profile
+        h1.profile__title Личный кабинет
+
+        .profile__content
+            include ../partials/profile-sidebar
+                - const user = locals.user
+
+            div.profile__content-right_card
+                h1.cart__title Мои заказы
+                div.order__container.order__container--lk
+                    div.order__top
+                        span Номер заказа
+                        span Дата доставки
+                        span Интервал доставки
+                        span Сумма заказа
+                        span Статус заказа
+                        span Тип доставки
+                        span Адрес доставки
+
+                    div.order__bottom
+                        if orders && orders.length > 0
+                            each order in orders
+                                a(href=`/profile/myorders/${order.id}`, class="order__bottom-item")
+                                    span= order.id
+                                    span= order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long'}) : 'Не указана'
+                                    span= order.deliveryInterval || 'Не указан'
+                                    span= `${order.totalAmount} ₽`
+                                    span= getOrderStatus(order.status)
+                                    span= getDeliveryType(order.deliveryType)
+                                    span= order.deliveryAddress || 'Не указан'
+
+                        else
+                            div.order__bottom-item
+                                span(colspan="7") У вас пока нет заказов.

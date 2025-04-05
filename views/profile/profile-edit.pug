@@ -1,0 +1,31 @@
+extends ../layouts/main
+
+block content
+    section.profile
+        h1.profile__title Личный кабинет
+
+        .profile__content
+            include ../partials/profile-sidebar
+                - const user = locals.user
+
+            div.profile__content-right_confidential
+                h4.profile__title Редактирование личных данных
+                form.profile__content-right_confidential_content(action="/profile/edit" method="POST")
+                    //input(type="hidden" name="id" value=user.id)
+                    label
+                        span Ваша фамилия
+                        input(type="text" name="lastName" placeholder="Иванов" value=user.lastName)
+                    label
+                        span Ваше имя
+                        input(type="text" name="firstName" placeholder="Иван" value=user.firstName)
+                    label
+                        span Ваше отчество
+                        input(type="text" name="middleName" placeholder="Иванович" value=user.middleName || '')
+                    label
+                        span Ваш email
+                        input(type="email" name="email" placeholder="email@mail.ru" value=user.email)
+                    label
+                        span Ваш номер телефона
+                        input(type="tel" name="phone" placeholder="89997776655" value=user.phone)
+
+                    button.profile__content-right_confidential_content_button(type="submit") Сохранить изменения

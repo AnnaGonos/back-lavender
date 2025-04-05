@@ -1,0 +1,10 @@
+extends layouts/main
+
+include mixins/post
+
+block content
+    section.blog
+        h2.blog__title Блог
+        div.blog__container.blog__container--two-column
+            each post in blogPosts
+                +blog-item(post.link, post.image, post.alt, post.date, post.title)

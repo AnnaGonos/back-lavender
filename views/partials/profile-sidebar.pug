@@ -1,0 +1,19 @@
+.profile__content-left
+    .profile__content-left-header
+        img.profile__content-header-img(src="/images/icons/person-fill.svg" alt="")
+        if user
+            p.profile__content-name= user.firstName + ' ' + user.lastName
+        else
+            p.profile__content-name Пользователь не найден
+
+    hr.profile__content-hr
+
+    .profile__content-left-content
+        each item in [{icon: 'house.svg', name: 'Главная', href: `/profile?id=${user.id}`}, {icon: 'shield-lock.svg', name: 'Редактировать данные', href: `/profile/edit?id=${user.id}`}, {icon: 'cart-check.svg', name: 'Мои заказы', href: `/profile/myorders`}, {icon: 'credit-card.svg', name: 'Программа лояльности', href: `/profile/bonus-card?id=${user.id}`}, {icon: 'door-open-fill.svg', name: 'Выход', target: 'logout'}]
+            .profile__content-left-item(data-target=item.target)
+                img.profile__content-left-img(src=`/images/icons/${item.icon}` alt="")
+                if item.href
+                    a(href=item.href)
+                        p.profile__content-left-name= item.name
+                else
+                    p.profile__content-left-name= item.name

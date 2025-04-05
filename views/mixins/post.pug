@@ -1,0 +1,6 @@
+mixin blog-item(link, image, alt, date, title)
+    a.blog__item(href=link)
+        img.blog__item-image.blog__item-image--long-photo(src=image, alt=alt)
+        div.blog__item-description
+            p.blog__item-date= date
+            p.blog__item-title= title

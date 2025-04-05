@@ -1,0 +1,40 @@
+extends ../layouts/main
+include ../mixins/backButton
+
+block content
+    section.florist
+        +backButton('/profile', 'В профиль')
+
+        .florist__header
+            h1.florist__title Работа с каталогом товаров
+
+        .florist__menu
+            a(href="/florist/categories", class="florist__menu-item florist__menu-item--center")
+                .florist__category-container
+                    img(src="/images/florist-catalog/1-category.png", alt="", class="florist__category-img")
+                    h2.florist__category-title Категории
+
+            // работа с товарами
+            a(href="/florist/products", class="florist__menu-item")
+                .florist__category-container
+                    img(src="/images/florist-catalog/2-category.png", alt="", class="florist__category-img")
+                    h2.florist__category-title Товары
+
+            // все заказы пользователей
+            a(href="/florist/orders", class="florist__menu-item")
+                .florist__category-container
+                    img(src="/images/florist-catalog/3-category.png", alt="", class="florist__category-img")
+                    h2.florist__category-title Заказы
+
+            // Доставки
+            //a(href="/florist/schedule", class="florist__menu-item")
+            //    .florist__category-container
+            //        img(src="/images/florist-catalog/6-category.png", alt="", class="florist__category-img")
+            //        h2.florist__category-title График доставок
+
+            // Отзывы
+            a(href="", class="florist__menu-item")
+                .florist__category-container
+                    img(src="/images/florist-catalog/5-category.png", alt="", class="florist__category-img")
+                    h2.florist__category-title Отзывы
+

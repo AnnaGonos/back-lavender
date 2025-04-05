@@ -1,0 +1,8 @@
+mixin review-item(name, date, comment, image)
+    .reviews__content-item
+        img.reviews__content-item-img(src=image, alt=name)
+        .reviews__content-item-text
+            .reviews__content-item-header
+                p.reviews__content-item-name= name
+                p.reviews__content-item-data= date
+            p.reviews__content-item-comment= comment

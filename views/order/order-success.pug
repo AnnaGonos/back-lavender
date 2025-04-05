@@ -1,0 +1,31 @@
+extends ../layouts/main
+include ../mixins/cart-item
+
+block content
+    section.cart
+        h1.cart__title Спасибо за ваш заказ!
+
+
+        div.cart__info
+
+            .cart__info-body
+                h2.card-title Информация о заказе
+                .cart__list-group
+                    .cart__list-group-item
+                        h5 Адрес доставки:
+                        span#deliveryAddress #{order.deliveryAddress}
+                    .cart__list-group-item
+                        h5 Дата доставки:
+                        span#deliveryDate #{order.deliveryDate}
+                    .cart__list-group-item
+                        h5 Время доставки:
+                        span#deliveryInterval #{order.deliveryInterval}
+                    .cart__list-group-item
+                        h5 Сумма заказа:
+                        span#totalAmount #{order.totalAmount} ₽
+
+            .cart__info-alert
+                p Этот заказ успешно создан. Ждите подтверждения.
+                p Если у флориста возникнут вопросы, мы можем перезвонить вам для уточнения некоторых деталей.
+
+            a(href="/", class="cart__button") Вернуться на главную

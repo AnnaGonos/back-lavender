@@ -1,0 +1,19 @@
+extends ../layouts/main
+
+block content
+    section.authorization
+        h1.authorization__title Вход
+        .authorization__container
+            form#authorization-form(action="/auth/login", method="POST")
+                .authorization__option
+                    input(type="email", id="email", name="email", required, placeholder="E-mail")
+
+                    input(type="password", id="password", name="email-password", required, placeholder="Пароль")
+
+                    .authorization__option-control-group
+                        button(type="submit") Войти в личный кабинет
+                        .authorization__option-control
+                            a(href="#") Не помню пароль
+                            div
+                                p Впервые здесь?
+                                a(href="/auth/register") Регистрация

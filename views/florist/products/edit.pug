@@ -1,0 +1,47 @@
+extends ../../layouts/main
+include ../../mixins/backButton
+
+block content
+    section.products
+        div.florist__navigation
+            +backButton('/florist/products', 'Назад')
+
+        h1.products__title= pageTitle
+
+        if product
+            form.products__form(action=`/florist/products/${product.id}?_method=PATCH` method="POST" enctype="multipart/form-data")
+                label(for="name") Название
+                input#name(type="text" name="name" value=product.name required)
+
+                label(for="description") Описание
+                textarea#description(name="description")= product.description || ''
+
+                label(for="composition") Состав
+                input#composition(type="text" name="composition" value=product.composition || '')
+
+                label(for="price") Цена
+                input#price(type="number" name="price" step="0.01" value=product.price required)
+
+                label(for="discount") Цена со скидкой
+                input#discount(type="number" name="discount" step="0.01" value=product.discount || '')
+
+                label(for="quantityInStock") Количество а магазине
+                input#quantityInStock(type="number" name="quantityInStock" value=product.quantityInStock required)
+
+                label(for="categoryName") Категория
+                    select#categoryName(name="categoryName" required)
+                        option(value="") Выберите категорию
+                        each category in categories
+                            option(value=category.name selected=(product.category && category.name === product.category.name ? 'selected' : ''))= category.name
+
+                div.images-container
+                    h3 Текущее изображение
+                    if product.imageUrl
+                        img(src=product.imageUrl alt="Текущее изображение товара" class="products-florist__img")
+                    label(for="image") Заменить изображение
+                    input#image(type="file" name="image" accept="image/*")
+
+                button.product-main__button(type="submit") Сохранить изменения
+
+        else
+            p Товар не найден.

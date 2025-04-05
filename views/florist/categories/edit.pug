@@ -1,0 +1,23 @@
+extends ../../layouts/main
+include ../../mixins/backButton
+
+block content
+    section.categories
+        div.florist__navigation
+            +backButton('/florist/categories', 'Назад')
+
+        h1.categories__title= pageTitle
+
+        if category
+            form.categories__form(action=`/florist/categories/${category.id}?_method=PATCH` method="POST")
+                label
+                    span Название
+                    input(type="text" name="name" value=category.name required)
+
+                label
+                    span Описание
+                    textarea(name="description")= category.description || ''
+
+                button.categories__button(type="submit") Сохранить изменения
+        else
+            p Категория не найдена.

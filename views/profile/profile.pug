@@ -1,0 +1,28 @@
+extends ../layouts/main
+
+block content
+    section.profile
+        a(href="/florist" class="profile__title-florist")
+            p Аккаунт флориста
+
+        h1.profile__title Личный кабинет
+
+        .profile__content
+            include ../partials/profile-sidebar
+                - const user = locals.user
+
+            .profile__content-right
+                h3.profile__title Учетные данные
+
+                .profile__info-block
+                    div.profile__info-row
+                        h5 ФИО
+                        span #{user.firstName} #{user.lastName} #{user.middleName}
+
+                    div.profile__info-row
+                        h5 Телефон
+                        span #{user.phone}
+
+                    div.profile__info-row
+                        h5 Почта
+                        span #{user.email}

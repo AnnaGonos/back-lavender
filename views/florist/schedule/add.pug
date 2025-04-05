@@ -1,0 +1,22 @@
+//extends ../../layouts/main
+//include ../../mixins/backButton
+//
+//block content
+//    section.schedule
+//        div.florist__navigation
+//            +backButton('/florist/schedule', 'Назад')
+//
+//        h1= pageTitle
+//
+//        form.schedule__form(action="/florist/schedule/add", method="POST")
+//            label(for="date") Дата:
+//            input(type="date", name="date", required)
+//
+//            h3 Выберите временные слоты (с 9:00 до 18:00)
+//            each slot in slots
+//                div
+//                    label.schedule__checkbox
+//                        input(type="checkbox", name="slots", value=slot)
+//                        span #{slot}
+//
+//            button.categories__button(type="submit") Сохранить

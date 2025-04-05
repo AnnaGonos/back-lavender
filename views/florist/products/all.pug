@@ -1,0 +1,61 @@
+extends ../../layouts/main
+include ../../mixins/backButton
+
+block content
+    section.products
+        div.florist__navigation
+            +backButton('/florist', 'Назад')
+            +backButton('/florist/categories', 'Категории')
+            +backButton('/florist/products/archived', 'Архив')
+
+        h1.products__title= pageTitle
+
+        a(href="/florist/products/add" class="product-main__button") Добавить новый товар
+
+        div.products-florist__filters
+            form(action="/florist/products" method="GET")
+                label(for="category") Выберите категорию
+                select#category(name="category" onchange="this.form.submit()")
+                    option(value="") Все категории
+                    if categories && categories.length > 0
+                        each category in categories
+                            option(value=category.name selected=(query.category === category.name))= category.name
+                    else
+                        option(disabled) Категории отсутствуют
+
+            div.sort-buttons
+                a(href="/florist/products?sort=newest" class="sort-button") От новых к старым
+                a(href="/florist/products?sort=oldest" class="sort-button") От старых к новым
+
+
+
+        div.products-florist__container
+            if products && products.length > 0
+                each product in products
+                    div.products-florist__item
+                        div.products-florist__content
+                            img(src=product.imageUrl alt=product.name class="products-florist__img")
+                            div.products__description
+                                h4= product.name
+
+                                h5.category-name
+                                    if product.category && product.category.name
+                                        | #{product.category.name}
+                                    else
+                                        | Без категории
+
+                                if product.discount > 0
+                                    div.product-florist__prices
+                                        span.product-main__price= product.discount + ' ₽'
+                                        span.product-main__price.discount= product.price + ' ₽'
+                                else
+                                    div.product-florist__prices-florist
+                                        span.product-main__price= product.price + ' ₽'
+                                span= `${product.quantityInStock} шт`
+
+                        div.products-florist__modify
+                            a(href=`/florist/products/${product.id}/edit` class="categories__edit-button") Редактировать
+                            form(action=`/florist/products/${product.id}/archive?_method=PATCH` method="POST")
+                                button.products__delete-button(type="submit") Архивировать
+            else
+                p Товаров пока нет.

@@ -1,0 +1,89 @@
+extends layouts/main
+
+include mixins/slider-slide
+include mixins/about-us-item
+include mixins/products-mini
+
+block content
+    section.slider
+        .slider__swiper.swiper
+            .slider__wrapper.swiper-wrapper
+                each slide in slides
+                    +slider-slide(slide.images, slide.subtitle, slide.title, slide.buttonText, slide.buttonLink)
+
+            img.slider__button.slider__button--next(src="images/icons/button-next.svg", alt="иконка вперед")
+            img.slider__button.slider__button--prev(src="images/icons/button-prev.svg", alt="иконка назад")
+
+            .slider__pagination.swiper-pagination
+
+    section.online
+        div.online__header
+            h2.online__title Онлайн-витрина
+            p Можно забрать прямо сейчас из магазина
+
+            div.catalog__container(id="products-container")
+                if products && products.length > 0
+                    each product in products
+                        +product-mini(product)
+                else
+                    p Товаров пока нет.
+
+
+    section.catalog
+        h2.catalog__title Популярное
+        .catalog__container-main
+            each item in catalogItems
+                a.catalog__item(href=`catalog.html?category=${item.category}`)
+                    img.catalog__image(src=item.image, alt=item.alt)
+                    p.catalog__name= item.name
+
+    section.about-us
+        .about-us__main
+            img.about-us__image(
+                src="https://avatars.mds.yandex.net/get-altay/1987173/2a000001746357717f3c659ebb67616e2bfc/XXXL",
+                alt="Изображение для раздела о нас"
+            )
+            .about-us__content
+                h2.about-us__title О нас
+                .about-us__description
+                    +about-us-item(
+                        "Широкий ассортимент",
+                        "Более 50 наименований цветов и растений. Разнообразие букетов, композиций и подарочных наборов на любой вкус. Также имеется 'онлайн-витрина' с готовыми, свежесобранными букетами для экстренных заказов."
+                    )
+                    +about-us-item(
+                        "Высокий уровень сервиса",
+                        "Оперативная обработка и доставка заказов, а так же вежливый и клиентоориентированный персонал."
+                    )
+                    +about-us-item(
+                        "Индивидуальный подход",
+                        "Наши профессиональные флористы с любовью и вниманием относятся к созданию каждого букета или композиции. Каждое творение неповторимо и уникально, ведь мы вкладываем частичку своей души в каждую работу."
+                    )
+                    +about-us-item(
+                        "Удобство заказа",
+                        "Несколько вариантов доставки (курьером, самовывоз)."
+                    )
+
+        .about-us__map
+            .about-us__content
+                h3.about-us__title Как нас найти?
+                .about-us__description-item
+                    .about-us__text
+                        img.about-us__address-icons(
+                            src="/images/icons/geo-alt-fill.svg",
+                            alt="Иконка карты"
+                        )
+                        a.about-us__address-link(href="#") г. Партизанск, ул. Замараева, 5
+                    p.about-us__description-item-text
+                        | Если вы направляетесь к нам на общественном транспорте, то ближайшая остановка - "Рынок". От нее
+                        | всего пара минут неспешной ходьбы до нашего магазина.
+                        br
+                        br
+                        | Мы работаем ежедневно с 8:00 до 19:00, так что вы всегда можете заглянуть к нам за свежими,
+                        | яркими цветами и букетами. Будем рады видеть вас!
+
+            .about-us__map-yandex
+                script(
+                    type="text/javascript", charset="utf-8", async,
+                    src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A04372f220e817e42113272e1b01f2c7800bf6b0612480513330a82c87dc3592e&amp;lang=ru_RU&amp;scroll=true"
+                )
+

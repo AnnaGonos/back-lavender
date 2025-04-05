@@ -1,0 +1,10 @@
+mixin slider-slide(images, subtitle, title, buttonText, buttonLink)
+    .slider__slide.swiper-slide
+        .slider__slide-background
+            each image in images
+                img.slider__slide-background-item(src=image, alt="Цветы для фона")
+        .slider__slide-description
+            p.slider__slide-subtitle= subtitle
+            p.slider__slide-title= title
+            a.slider__slide-button(href=buttonLink)= buttonText
+
