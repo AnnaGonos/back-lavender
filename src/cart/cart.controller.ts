@@ -1,99 +1,113 @@
 import {
-    Controller,
-    Get,
-    Post,
-    Body,
-    Render,
-    Session,
-    Req,
-    HttpException,
-    HttpStatus,
-    Param,
-    Delete
+  Controller,
+  Get,
+  Post,
+  Render,
+  Param,
+  Delete,
+  ParseIntPipe, Request, UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CreateOrderDto } from '../order/dto/create-order.dto';
-import {Cart} from "./entities/сart.entity";
-import {UserService} from "../user/user.service";
-import {Order} from "../order/entities/order.entity";
-import {DeliveryType} from "../order/entities/delivery-type.enum";
-import {OrderService} from "../order/order.service";
+import { Cart } from './entities/сart.entity';
+import { ApiExcludeController } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/auth.guard';
 
 @Controller('cart')
+@UseGuards(JwtAuthGuard)
+@ApiExcludeController()
 export class CartController {
-    constructor(
-        private readonly cartService: CartService,
-        private readonly userService: UserService,
-    ) {}
+  constructor(private readonly cartService: CartService) {}
 
-    @Get('')
-    @Render('cart')
-    async getCartPage(@Session() session: Record<string, any>) {
-        const userId = 1;
-        const cartItems = await this.cartService.getCartItems(userId);
+  @Get()
+  @Render('cart')
+  async getCartPage(@Request() req) {
+    const userId = 1;
+    const cartItems = await this.cartService.getCartItems(userId);
 
-        if (!cartItems || cartItems.length === 0) {
-            return { pageTitle: 'Корзина', cartItems: [], originalSum: 0, discountAmount: 0, user: null,};
-        }
-
-        const user = await this.userService.findOne(userId);
-        const originalSum = this.cartService.calculateOriginalSum(cartItems);
-        const discountAmount = this.cartService.calculateDiscountAmount(cartItems);
-
-        return {
-            pageTitle: 'Корзина',
-            cartItems,
-            originalSum,
-            discountAmount,
-            user: {
-                id: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                phone: user.phone,
-            },
-        };
+    if (!cartItems || cartItems.length === 0) {
+      return {
+        pageTitle: 'Корзина',
+        cartItems: [],
+        originalSum: 0,
+        discountAmount: 0,
+      };
     }
 
-    @Post(':productId/add')
-    async addItemToCart(@Param('productId') productId: string): Promise<{ added: boolean }> {
-        const userId = 1;
-        await this.cartService.addItemToCart(userId, parseInt(productId, 10));
-        return { added: true };
-    }
+    const originalSum = this.cartService.calculateOriginalSum(cartItems);
+    const discountAmount = this.cartService.calculateDiscountAmount(cartItems);
 
-    @Delete(':productId/remove')
-    async removeItemFromCart(@Param('productId') productId: string): Promise<{ removed: boolean }> {
-        const userId = 1;
-        await this.cartService.removeItemFromCart(userId, parseInt(productId, 10));
-        return { removed: true };
-    }
+    return {
+      pageTitle: 'Корзина',
+      cartItems,
+      originalSum,
+      discountAmount,
+    };
+  }
 
-    @Post(':productId/increase')
-    async increaseQuantity(@Param('productId') productId: string): Promise<{ updated: boolean }> {
-        const userId = 1;
-        await this.cartService.increaseQuantity(userId, parseInt(productId, 10));
-        return { updated: true };
-    }
+  @Get('count')
+  async getCartCount(@Request() req): Promise<{ count: number }> {
+    const userId = 1;
+    const count = await this.cartService.getCartItemCount(userId);
+    return {
+      count,
+    };
+  }
 
-    @Post(':productId/decrease')
-    async decreaseQuantity(@Param('productId') productId: string): Promise<{ updated: boolean }> {
-        const userId = 1;
-        await this.cartService.decreaseQuantity(userId, parseInt(productId, 10));
-        return { updated: true };
-    }
+  @Get('items')
+  async getCartItems(@Request() req): Promise<Cart[]> {
+    const userId = 1;
+    return await this.cartService.getCartItems(userId);
+  }
 
-    @Get('count')
-    async getCartCount(): Promise<{ count: number }> {
-        const userId = 1;
-        const count = await this.cartService.getCartItemCount(userId);
-        return { count };
-    }
+  @Post(':productId/add')
+  async addItemToCart(
+    @Param('productId', ParseIntPipe) productId: number, @Request() req
+  ): Promise<{ added: boolean }> {
+    const userId = 1;
+    await this.cartService.addItemToCart(userId, productId);
+    return {
+      added: true,
+    };
+  }
 
-    @Get('items')
-    async getCartItems(): Promise<Cart[]> {
-        const userId = 1;
-        return await this.cartService.getCartItems(userId);
-    }
+  @Post(':productId/increase')
+  async increaseQuantity(
+    @Param('productId', ParseIntPipe) productId: number, @Request() req
+  ): Promise<{ updated: boolean }> {
+    const userId = 1;
+    await this.cartService.increaseQuantity(userId, productId);
+    return {
+      updated: true,
+    };
+  }
 
+  @Post(':productId/decrease')
+  async decreaseQuantity(
+    @Param('productId', ParseIntPipe) productId: number, @Request() req
+  ): Promise<{ updated: boolean }> {
+    const userId = 1;
+    await this.cartService.decreaseQuantity(userId, productId);
+    return {
+      updated: true,
+    };
+  }
+
+  @Delete(':productId/remove')
+  async removeItemFromCart(
+    @Param('productId', ParseIntPipe) productId: number, @Request() req
+  ): Promise<{ removed: boolean }> {
+    const userId = 1;
+
+    await this.cartService.removeItemFromCart(userId, productId);
+    return {
+      removed: true,
+    };
+  }
+
+  @Delete('clear')
+  async clearCart(@Request() req): Promise<{ cleared: boolean }> {
+    const userId = 1;
+    await this.cartService.clearCart(userId);
+    return { cleared: true };
+  }
 }

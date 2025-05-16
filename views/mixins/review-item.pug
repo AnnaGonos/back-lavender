@@ -1,8 +1,14 @@
-mixin review-item(name, date, comment, image)
-    .reviews__content-item
-        img.reviews__content-item-img(src=image, alt=name)
-        .reviews__content-item-text
-            .reviews__content-item-header
-                p.reviews__content-item-name= name
-                p.reviews__content-item-data= date
-            p.reviews__content-item-comment= comment
+mixin reviewItem(review)
+    article.reviews__content-item(data-review-id=review.id)
+        if review.image
+            img(src=review.image, alt="Фото к отзыву", class="reviews__content-item-img")
+        div.reviews__content-item-text
+            div.reviews__content-item-header
+                p.reviews__content-item-name= `${review.user.firstName || ''} ${review.user.lastName || ''}`.trim()
+                p.reviews__content-item-date= review.createdAt.toLocaleDateString()
+            p.reviews__content-item-review= review.rating
+            p.reviews__content-item-comment= review.description || ''
+
+        div.reviews__actions
+            button.reviews__action-edit(data-action="edit") Редактировать
+            button.reviews__action-delete(data-action="delete") Удалить

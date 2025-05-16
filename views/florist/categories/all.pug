@@ -2,25 +2,85 @@ extends ../../layouts/main
 include ../../mixins/backButton
 
 block content
-    section.categories
-        div.florist__navigation
-            +backButton('/florist', 'Назад')
-            +backButton('/florist/products', 'Товары')
+    div.wrapper
+        section.categories
+            div.florist__navigation
+                +backButton('/florist', 'Назад')
+                +backButton('/florist/products', 'Товары')
 
-        h1.categories__title= pageTitle
+            h1.categories__title= pageTitle
 
-        a(href="/florist/categories/add" class="categories__button") Добавить новую категорию
-
-        if categories && categories.length > 0
-            div.categories__container
-                each category in categories
-                    div.categories__item
-                        h5= category.name
-                        span= category.description || 'Нет описания'
-                        a(href=`/florist/categories/${category.id}/edit` class="categories__edit-button") Редактировать
-                        form.categories__delete-form(action=`/florist/categories/${category.id}?_method=DELETE` method="POST")
-                            button.categories__delete-button(type="submit") Удалить
-        else
-            p Категорий пока нет.
+            a(href="/florist/categories/add" class="categories__button") Добавить новую категорию
 
 
+            if categories && categories.length > 0
+                div.categories__container
+                    each category in categories
+                        div.categories__item(data-category-id=category.id)
+                            h5= category.name
+                            span= category.description || 'Нет описания'
+                            div.categories__actions
+                                a(href=`/florist/categories/${category.id}/edit` class="categories__edit-button")
+                                    svg.bi.bi-pencil-fill(width="16" height="16" fill="currentColor" viewBox="0 0 16 16")
+                                        path(d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z")
+                                form.categories__delete-form(action=`/florist/categories/${category.id}?_method=DELETE` method="POST")
+                                    button.categories__delete-button(type="submit" title="Удалить")
+                                        svg.bi.bi-trash-fill(width="16" height="16" fill="currentColor" viewBox="0 0 16 16")
+                                            path(d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0/")
+            else
+                p Категорий пока нет.
+
+            if pagination.totalPages > 1
+                div.pagination
+                    if pagination.hasPrevPage
+                        a.pagination__info(href=`?page=${pagination.currentPage - 1}&limit=${pagination.limit}` class="pagination__link") Предыдущая страница
+                    span Страница #{pagination.currentPage} из #{pagination.totalPages}
+                    if pagination.hasNextPage
+                        a.pagination__info(href=`?page=${pagination.currentPage + 1}&limit=${pagination.limit}` class="pagination__link") Следующая страница
+
+
+        script(src="/js/floristCategory.js")
+        script.
+          document.querySelectorAll('.categories__delete-form').forEach(form => {
+            form.addEventListener('submit', async function(event) {
+              event.preventDefault();
+
+              const confirmDelete = confirm('Вы уверены, что хотите удалить эту категорию?');
+              if (!confirmDelete) return;
+
+              const button = this.querySelector('button[type="submit"]');
+              const originalText = button.textContent;
+              button.disabled = true;
+              button.textContent = 'Удаление...';
+
+              const actionUrl = this.getAttribute('action');
+
+              try {
+                const response = await fetch(actionUrl, {
+                  method: 'DELETE',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                });
+
+                if (response.ok) {
+                  const categoryItem = this.closest('.categories__item');
+                  if (categoryItem) {
+                    categoryItem.remove();
+                  } else {
+                    location.reload();
+                  }
+                } else {
+                  const errorData = await response.json();
+                  alert('Ошибка: ' + (errorData.message || 'Не удалось удалить категорию'));
+                  button.disabled = false;
+                  button.textContent = originalText;
+                }
+              } catch (error) {
+                console.error('Ошибка при удалении:', error);
+                alert('Произошла сетевая ошибка.');
+                button.disabled = false;
+                button.textContent = originalText;
+              }
+            });
+          });

@@ -2,22 +2,70 @@ extends ../../layouts/main
 include ../../mixins/backButton
 
 block content
-    section.categories
-        div.florist__navigation
-            +backButton('/florist/categories', 'Назад')
+    div.wrapper
+        section.categories
+            div.florist__navigation
+                +backButton('/florist/categories', 'Назад')
 
-        h1.categories__title= pageTitle
+            h1.categories__title= pageTitle
 
-        if category
-            form.categories__form(action=`/florist/categories/${category.id}?_method=PATCH` method="POST")
-                label
-                    span Название
-                    input(type="text" name="name" value=category.name required)
+            if category
+                form.categories__form(
+                    id="edit-category-form"
+                    action=`/florist/categories/${category.id}?_method=PATCH`
+                    method="POST"
+                    onsubmit="return handleEditSubmit(event)"
+                )
+                    input(type="hidden", name="id", value=category.id)
+                    label
+                        span Название
+                        input(type="text" name="name" value=category.name required)
 
-                label
-                    span Описание
-                    textarea(name="description")= category.description || ''
+                    label
+                        span Описание
+                        textarea(name="description")= category.description || ''
 
-                button.categories__button(type="submit") Сохранить изменения
-        else
-            p Категория не найдена.
+                    button.categories__button(type="submit") Сохранить изменения
+            else
+                p Категория не найдена.
+
+        script.
+          async function handleEditSubmit(e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const payload = {
+              name: formData.get('name'),
+              description: formData.get('description'),
+            };
+
+            const categoryId = formData.get('id');
+
+            try {
+              const response = await fetch(`/florist/categories/${categoryId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              });
+
+              if (response.ok) {
+                const redirectUrl = '/florist/categories';
+                window.location.href = redirectUrl;
+              } else {
+                const errorData = await response.json();
+                alert('Ошибка: ' + (errorData.message || 'Не удалось сохранить изменения'));
+              }
+            } catch (error) {
+              console.error('Ошибка при отправке запроса:', error);
+              alert('Произошла сетевая ошибка.');
+            }
+
+            return false;
+          }
+
+          document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('edit-category-form');
+            if (form) {
+              form.onsubmit = handleEditSubmit;
+            }
+          });

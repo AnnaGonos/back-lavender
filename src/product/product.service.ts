@@ -1,258 +1,265 @@
-import {HttpException, HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
 import { Product } from './entities/product.entity';
-import {CreateProductDto} from "./dto/create-product.dto";
-import {UpdateProductDto} from "./dto/update-product.dto";
-import {Category} from "../category/entities/category.entity";
-import {FavoriteService} from "../favorite/favorite.service";
-import {Favorite} from "../favorite/entities/favorite.entity";
-import {UpdateCategoryDto} from "../category/dto/update-category.dto";
-import {Cart} from "../cart/entities/сart.entity";
-import {Observable} from "rxjs";
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { Category } from '../category/entities/category.entity';
+import { Favorite } from '../favorite/entities/favorite.entity';
+import { Cart } from '../cart/entities/сart.entity';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ProductService {
-    constructor(
-        @InjectRepository(Product)
-        private readonly productRepository: Repository<Product>,
-        @InjectRepository(Cart)
-        private readonly cartRepository: Repository<Cart>,
-        @InjectRepository(Category)
-        private readonly categoryRepository: Repository<Category>,
-        @InjectRepository(Favorite)
-        private readonly favoriteRepository: Repository<Favorite>,
-    ) {}
+  constructor(
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+    @InjectRepository(Cart)
+    private readonly cartRepository: Repository<Cart>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Favorite)
+    private readonly favoriteRepository: Repository<Favorite>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
+  ) {}
 
-    async findAll(): Promise<Product[]> {
-        return this.productRepository.find({
-            where: { quantityInStock: MoreThan(0) }, // токльо товары с количеством > 0
-            relations: ['category'],
-        });
+  async findAll(): Promise<Product[]> {
+    return this.productRepository.find({
+      where: { quantityInStock: MoreThan(0) }, // токльо товары с количеством > 0
+      relations: ['category'],
+    });
+  }
+
+  async findById(id: number): Promise<Product> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['category'],
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with #${id} not found`);
     }
 
-    async findById(id: string): Promise<Product> {
-        // @ts-ignore
-        return this.productRepository.findOne({
-            // @ts-ignore
-            where: { id },
-            relations: ['category'],
-        });
+    return product;
+  }
+
+  async findAllByCategory(categoryName: string): Promise<Product[]> {
+    if (categoryName === 'all') {
+      return this.productRepository.find({
+        where: { quantityInStock: MoreThan(0) },
+        relations: ['category'],
+      });
     }
 
-    async findAllByCategory(categoryName: string): Promise<Product[]> {
-        if (categoryName === 'all') {
-            return this.productRepository.find({
-                where: { quantityInStock: MoreThan(0) },
-                relations: ['category'],
-            });
+    return this.productRepository.find({
+      where: { category: { name: categoryName }, quantityInStock: MoreThan(0) },
+      relations: ['category'],
+    });
+  }
+
+  async findLatestOnlineProducts(limit = 4): Promise<Product[]> {
+    return this.productRepository.find({
+      where: { category: { name: 'Онлайн-витрина' } },
+      relations: ['category'],
+      order: { createdAt: 'DESC' },
+      take: limit,
+    });
+  }
+
+  async findAllSortedByDate(order: 'ASC' | 'DESC'): Promise<Product[]> {
+    return this.productRepository.find({
+      where: {
+        quantityInStock: MoreThan(0),
+      },
+      relations: ['category'],
+      order: { createdAt: order },
+    });
+  }
+
+  async findAllActive(): Promise<Product[]> {
+    return this.productRepository.find({
+      where: { quantityInStock: MoreThan(0) }, // только активные товары
+      relations: ['category'],
+    });
+  }
+
+  async findAllArchived(): Promise<Product[]> {
+    return this.productRepository.find({
+      where: { quantityInStock: 0 },
+      relations: ['category'],
+    });
+  }
+
+  async create(
+    createProductDto: CreateProductDto,
+  ) {
+    const { categoryName, ...productData } = createProductDto;
+
+    const category = await this.categoryRepository.findOne({
+      where: { name: categoryName },
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category not found`);
+    }
+
+    const product = this.productRepository.create({
+      ...productData,
+      category,
+    });
+
+    return this.productRepository.save(product);
+  }
+
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+    file?: Express.Multer.File,
+  ): Promise<Product> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['cartItems', 'category'],
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with #${id} not found`);
+    }
+
+    Object.assign(product, updateProductDto);
+
+    if (updateProductDto.categoryName) {
+      const category = await this.categoryRepository.findOne({
+        where: { name: updateProductDto.categoryName },
+      });
+
+      if (!category) {
+        throw new NotFoundException(`Category not found`);
+      }
+
+      product.category = category;
+    }
+
+    if (
+      updateProductDto.quantityInStock !== undefined &&
+      product.cartItems.length > 0
+    ) {
+      for (const cartItem of product.cartItems) {
+        if (cartItem.quantity > updateProductDto.quantityInStock) {
+          cartItem.quantity = updateProductDto.quantityInStock;
+          await this.cartRepository.save(cartItem);
         }
-
-        return this.productRepository.find({
-            where: { category: { name: categoryName }, quantityInStock: MoreThan(0) },
-            relations: ['category'],
-        });
+      }
     }
 
-    async findLatestOnlineProducts(limit = 4): Promise<Product[]> {
-        return this.productRepository.find({
-            where: { category: { name: 'Онлайн-витрина' } },
-            relations: ['category'],
-            order: { createdAt: 'DESC' },
-            take: limit,
-        });
+    return this.productRepository.save(product);
+  }
+
+  async findOne(id: number): Promise<Product> {
+    const product = await this.productRepository.findOneBy({ id });
+    if (!product) {
+      throw new NotFoundException(`Product with #${id} not found`);
     }
 
-    async getAllCategories(): Promise<Category[]> {
-        return this.categoryRepository.find();
+    return product;
+  }
+
+  async delete(id: number): Promise<void> {
+    const product = await this.productRepository.findOneBy({ id });
+
+    if (!product) {
+      throw new NotFoundException(`Product with #${id} not found`);
     }
 
-    async findAllSortedByDate(order: 'ASC' | 'DESC'): Promise<Product[]> {
-        return this.productRepository.find({
-            where: {
-                quantityInStock: MoreThan(0)
-            },
-            relations: ['category'],
-            order: { createdAt: order },
-        });
+    await this.favoriteRepository.delete({ product: { id } });
+    await this.cartRepository.delete({ product: { id } });
+    await this.productRepository.remove(product);
+  }
+
+  async archive(id: number): Promise<void> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['cartItems'],
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with #${id} not found`);
     }
 
-    async create(createProductDto: CreateProductDto, file?: Express.Multer.File): Promise<Product> {
-        const { categoryName, ...productData } = createProductDto;
+    console.log(`Archiving product with ID: ${id}`);
+    product.quantityInStock = 0;
 
-        const category = await this.categoryRepository.findOne({
-            where: { name: categoryName },
-        });
+    await this.cartRepository.delete({ product: { id } });
 
-        if (!category) {
-            throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
-        }
+    await this.productRepository.save(product);
+  }
 
-        // @ts-ignore
-        const product = this.productRepository.create({
-            ...productData, category, imageUrl: file ? `/uploads/${file.filename}` : null, });
+  async getFilteredAndSortedProducts(
+    categoryName?: string,
+    page: number = 1,
+    limit: number = 20,
+    sortByNewest: boolean = false,
+  ): Promise<{ products: Product[]; total: number }> {
+    const cacheKey = 'products_all';
+    const cachedData = await this.cacheManager.get<{ products: Product[]; total: number }>(cacheKey);
 
-        // @ts-ignore
-        return this.productRepository.save(product);
+    if (cachedData) {
+      console.log('Products fetched from cache');
+      return cachedData;
     }
 
-    async update(id: number, updateProductDto: UpdateProductDto, file?: Express.Multer.File): Promise<void> {
-        const product = await this.productRepository.findOne({
-            where: {id},
-            relations: ['cartItems'],
-        });
+    const queryBuilder = this.productRepository.createQueryBuilder('product');
 
-        if (!product) {
-            throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
-        }
+    queryBuilder.leftJoinAndSelect('product.category', 'category');
+    queryBuilder.where('product.quantityInStock > :quantity', { quantity: 0 });
 
-        Object.assign(product, updateProductDto);
+    if (categoryName) {
+      queryBuilder.andWhere('category.name = :categoryName', { categoryName });
+      const categoryExists = await this.productRepository
+        .createQueryBuilder('product')
+        .leftJoin('product.category', 'category')
+        .where('category.name = :categoryName', { categoryName })
+        .getExists();
 
-        if (file) {
-            product.imageUrl = `/uploads/${file.filename}`;
-        }
-
-        if (updateProductDto.categoryName) {
-            const category = await this.categoryRepository.findOne({
-                where: {name: updateProductDto.categoryName},
-            });
-
-            if (!category) {
-                throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
-            }
-
-            product.category = category;
-        }
-
-        if (updateProductDto.quantityInStock !== undefined && product.cartItems.length > 0) {
-            for (const cartItem of product.cartItems) {
-                if (cartItem.quantity > updateProductDto.quantityInStock) {
-                    cartItem.quantity = updateProductDto.quantityInStock;
-                    await this.cartRepository.save(cartItem);
-                }
-            }
-        }
-
-        await this.productRepository.save(product);
+      if (!categoryExists) {
+        throw new NotFoundException(`Category "${categoryName}" not found`);
+      }
     }
 
-    async findOne(id: number): Promise<Product> {
-        const product = await this.productRepository.findOneBy({ id });
-        if (!product) {
-            throw new NotFoundException('Product not found');
-        }
-        return product;
+    if (sortByNewest) {
+      queryBuilder.orderBy('product.createdAt', 'DESC');
     }
 
+    const [products, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
 
-    async delete(id: number): Promise<void> {
-        console.log(`Deleting product with ID in service: ${id}`); // Логируем ID
+    const data = { products, total };
+    await this.cacheManager.set(cacheKey, data, 10000);
+    console.log('Products fetched from database');
+    return data;
+  }
 
-        const product = await this.productRepository.findOneBy({ id });
+  // при заказе уменьшаем количество
+  async decreaseStock(productId: number, quantity: number): Promise<void> {
+    const product = await this.productRepository.findOneBy({ id: productId });
 
-        if (!product) {
-            console.error(`Product with ID ${id} not found`);
-            throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
-        }
-
-        console.log(`Found product:`, product); // Логируем найденный товар
-
-        await this.favoriteRepository.delete({ product: { id } });
-        await this.cartRepository.delete({ product: { id } });
-        await this.productRepository.remove(product);
-
-        console.log(`Product with ID ${id} successfully deleted`); // Логируем успешное удаление
+    if (!product) {
+      throw new NotFoundException(`Product with #${productId} not found`);
     }
 
-    async archive(id: number): Promise<void> {
-        const product = await this.productRepository.findOne({
-            where: { id },
-            relations: ['cartItems'],
-        });
-
-        if (!product) {
-            throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
-        }
-
-        console.log(`Archiving product with ID: ${id}`);
-        product.quantityInStock = 0;
-
-        // Удаляем связанные элементы корзины
-        await this.cartRepository.delete({ product: { id } });
-
-        await this.productRepository.save(product);
+    if (product.quantityInStock < quantity) {
+      throw new Error(
+        `Недостаточно товара а магазине с ID ${productId}`,
+      );
     }
 
-    async findAllActive(): Promise<Product[]> {
-        return this.productRepository.find({
-            where: { quantityInStock: MoreThan(0) }, // только активные товары
-            relations: ['category'],
-        });
-    }
-
-    async findAllArchived(): Promise<Product[]> {
-        return this.productRepository.find({
-            where: { quantityInStock: 0 },
-            relations: ['category'],
-        });
-    }
-
-    async getFilteredAndSortedProducts(categoryName?: string, sort?: string,
-        minPrice?: number, maxPrice?: number): Promise<Product[]> {
-        let products = await this.productRepository.find({
-            where: { quantityInStock: MoreThan(0) },
-            relations: ['category'],
-        });
-
-        if (categoryName) {
-            products = products.filter(product => product.category?.name === categoryName);
-        }
-
-        if (minPrice !== undefined || maxPrice !== undefined) {
-            products = products.filter(product => {
-                const price = product.price;
-                return (minPrice === undefined || price >= minPrice) && (maxPrice === undefined || price <= maxPrice);
-            });
-        }
-
-        if (sort === 'newest') {
-            products = products.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        } else if (sort === 'oldest') {
-            products = products.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        } else if (sort === 'price_asc') {
-            products = products.sort((a, b) => a.price - b.price);
-        } else if (sort === 'price_desc') {
-            products = products.sort((a, b) => b.price - a.price);
-        }
-
-        return products;
-    }
-
-    async getPriceRange(): Promise<{ minPrice: number; maxPrice: number }> {
-        const prices = await this.productRepository
-            .createQueryBuilder('product')
-            .select('MIN(product.price)', 'minPrice')
-            .addSelect('MAX(product.price)', 'maxPrice')
-            .where('product.quantityInStock > :quantity', { quantity: 0 })
-            .getRawOne();
-
-        return {
-            minPrice: prices.minPrice || 0,
-            maxPrice: prices.maxPrice || 0,
-        };
-    }
-
-    async decreaseStock(productId: number, quantity: number): Promise<void> {
-        const product = await this.productRepository.findOneBy({ id: productId });
-        if (!product) {
-            throw new Error(`Товар с ID ${productId} не найден`);
-        }
-
-        if (product.quantityInStock < quantity) {
-            throw new Error(`Недостаточно товара на складе для продукта с ID ${productId}`);
-        }
-
-        product.quantityInStock -= quantity;
-        await this.productRepository.save(product);
-    }
+    product.quantityInStock -= quantity;
+    await this.productRepository.save(product);
+  }
 }

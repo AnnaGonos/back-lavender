@@ -2,288 +2,38 @@ extends layouts/main
 include mixins/cart-item
 
 block content
-    section.cart
-        h1.cart__title= pageTitle
+    div.wrapper
+        section.cart
+            h1.cart__title= pageTitle
 
-        .cart__container
-            .cart__list
-                .cart__remove
-                    span Очистить корзину
+            .cart__container
+                .cart__list
+                    .cart__remove
+                        button#clear-cart Очистить корзину
 
-                if cartItems && cartItems.length > 0
-                    each item in cartItems
-                        +cart-item(item)
-                else
-                    p Корзина пуста.
+                    if cartItems && cartItems.length > 0
+                        each item in cartItems
+                            +cart-item(item)
+                    else
+                        p Корзина пуста.
 
-            .cart__decoration
-                h2 Ваш заказ
+                .cart__decoration
+                    h2 Ваш заказ
 
-                .cart__sum
-                    span Сумма
-                    span#original-sum= originalSum + ' ₽'
+                    .cart__sum
+                        span Сумма
+                        span#original-sum= originalSum + ' ₽'
 
-                .cart__sum.cart__sum--sale
-                    span Скидка
-                    span#discount-amount= '-' + discountAmount.toFixed(2) + ' ₽'
+                    .cart__sum.cart__sum--sale
+                        span Скидка
+                        span#discount-amount= '-' + discountAmount.toFixed(2) + ' ₽'
 
-                hr.cart__divider
+                    hr.cart__divider
 
-                .cart__sum.cart__sum--total
-                    span Итого
-                    span#total-sum= (originalSum - discountAmount).toFixed(2) + ' ₽'
+                    .cart__sum.cart__sum--total
+                        span Итого
+                        span#total-sum= (originalSum - discountAmount).toFixed(2) + ' ₽'
 
-                a(href="/orders" class="cart__button") Оформить заказ
-
-
-
-        //extends layouts/main
-        //include mixins/cart-item
-        //
-        //block content
-        //    section.cart
-        //        h1.cart__title= pageTitle
-        //
-        //        .cart__container
-        //            .cart__list
-        //                .cart__remove
-        //                    span Очистить корзину
-        //
-        //
-        //
-        //        // Итоговая информация о заказе
-        //        .cart__decoration
-        //            h2 Ваш заказ
-        //
-        //            .cart__sum
-        //                span Сумма
-        //                span#original-sum= originalSum + ' ₽'
-        //
-        //            .cart__sum.cart__sum--sale
-        //                span Скидка
-        //                span#discount-amount= '-' + discountAmount.toFixed(2) + ' ₽'
-        //
-        //            .cart__sum.cart__sum--bonus#bonus-to-spend(style="display: none;")
-        //                span Будет списано монет
-        //                span#spend-amount - 0 ₽
-        //
-        //            hr.cart__divider
-        //
-        //            .cart__sum.cart__sum--total
-        //                span Итого
-        //                span#total-sum= (originalSum - discountAmount).toFixed(2) + ' ₽'
-        //
-        //            .cart__bonus
-        //                .cart__bonus-amount
-        //                    label(for="bonus-action") Монеты
-        //                    .bonus-action__available-bonus
-        //                        span Монеты на вашем счете
-        //                        span#available-bonus= availableBonus.toFixed(2)
-        //                    select#bonus-action(name="bonusAction" required)
-        //                        option(value="accumulate") Копить
-        //                        option(value="spend") Списать монеты
-        //
-        //    // Форма оформления заказа
-        //    form.order__form(action="/order/create" method="POST")
-        //        .order__section
-        //            h3.order__subtitle Контактные данные
-        //            .order__input-group
-        //                label(for="your-name") Ваше имя
-        //                input#your-name(type="text" name="name" value=user.firstName readonly)
-        //
-        //            .order__input-group
-        //                label(for="your-phone") Ваш телефон
-        //                input#your-phone(type="tel" name="phone" value=user.phone readonly)
-        //
-        //            .order__input-group
-        //                label(for="recipient-name") Имя получателя
-        //                input#recipient-name(type="text" name="recipientName" placeholder="Введите имя получателя" required)
-        //
-        //            .order__input-group
-        //                label(for="recipient-phone") Телефон получателя
-        //                input#recipient-phone(type="tel" name="recipientPhone" placeholder="Введите телефон получателя" required)
-        //
-        //            .order__input-group
-        //                label(for="comments") Комментарий для флориста
-        //                textarea#comments(name="comments" placeholder="Напишите ваши пожелания..." rows="4")
-        //
-        //        .order__section
-        //            h3.order__subtitle Доставка
-        //            label Способ доставки
-        //            .order__delivery-options
-        //                label
-        //                    input(type="radio" name="deliveryType" value="courier" checked)
-        //                    | Курьером
-        //                label
-        //                    input(type="radio" name="deliveryType" value="pickup")
-        //                    | Самовывоз (ул. Замараева, 5)
-        //
-        //            .order__delivery-address(id="delivery-address" style="display: none;")
-        //                .order__input-group
-        //                    label(for="city") Город
-        //                    input#city(type="text" name="city" placeholder="Введите город" required)
-        //
-        //                .order__input-group
-        //                    label(for="street") Улица
-        //                    input#street(type="text" name="street" placeholder="Введите улицу" required)
-        //
-        //                .order__input-group
-        //                    label(for="house") Дом
-        //                    input#house(type="text" name="house" placeholder="Введите дом" required)
-        //
-        //                .order__input-group
-        //                    label(for="apartment") Квартира
-        //                    input#apartment(type="text" name="apartment" placeholder="Введите квартиру")
-        //
-        //            .order__input-group
-        //                label(for="delivery-date") Дата доставки
-        //                input#delivery-date(type="date" name="deliveryDate" required)
-        //
-        //            .order__input-group
-        //                label(for="delivery-interval") Интервал доставки
-        //                select#delivery-interval(name="deliveryInterval" required)
-        //                    option(value="morning") Утро (9:00 - 12:00)
-        //                    option(value="afternoon") День (12:00 - 15:00)
-        //                    option(value="evening") Вечер (15:00 - 18:00)
-        //                    option(value="night") Поздний вечер (18:00 - 21:00)
-        //
-        //            .order__input-group
-        //                label(for="courier-comment") Комментарий для курьера
-        //                textarea#courier-comment(name="courierComment" placeholder="Напишите комментарий..." rows="4")
-        //
-        //        .order__section
-        //            h3.order__subtitle Способ оплаты
-        //            label(for="payment-method") Выберите способ оплаты
-        //            select#payment-method(name="paymentMethod" required)
-        //                option(value="cash" selected) Наличными при получении
-        //                option(value="online") Онлайн
-        //
-        //        .order__section
-        //            h3.order__subtitle Итоговая сумма
-        //            p
-        //                span Стоимость доставки:
-        //                span#delivery-cost(style="font-weight: bold;") 0.00 ₽
-        //            p
-        //                span Сумма с учетом доставки:
-        //                span#final-total(style="font-weight: bold;") 0.00 ₽
-        //
-        //        input(type="hidden" name="finalTotal" id="final-total-input")
-        //        button.order__submit-button(type="submit") Оформить заказ
-        //
-        //    script(src="/js/cart.js" defer)
-            //script(src="/js/checkout.js" defer)
-
-        //script(src="/js/createOrder.js" defer)
-        //script(type="application/json", id="delivery-slots-data").
-        //    !{JSON.stringify(deliverySlots)}
-
-
-        //
-        //form.cart__form(action="/orders/create" method="POST")
-        //    .cart__container
-        //        h3.cart__subtitle Контактные данные
-        //        label(for="recipient-name") Имя получателя
-        //        input#recipient-name(type="text" name="recipientName" placeholder="Введите имя получателя")
-        //
-        //        label(for="recipient-phone") Телефон получателя
-        //        input#recipient-phone(type="tel" name="recipientPhone" placeholder="Введите телефон получателя")
-        //
-        //    .cart__section
-        //        h3.cart__subtitle Доставка
-        //        label Способ доставки
-        //        .cart__delivery-options
-        //            label
-        //                input(type="radio" name="deliveryType" value="pickup" checked)
-        //                | Самовывоз (ул. Замараева, 5)
-        //
-        //            label
-        //                input(type="radio" name="deliveryType" value="courier")
-        //                | Курьером
-        //
-        //        .cart__delivery-address(id="delivery-address" style="display: none;")
-        //            label(for="city") Город
-        //            input#city(type="text" name="city" placeholder="Введите город")
-        //
-        //            label(for="street") Улица
-        //            input#street(type="text" name="street" placeholder="Введите улицу")
-        //
-        //            label(for="house") Дом
-        //            input#house(type="text" name="house" placeholder="Введите дом")
-        //
-        //            label(for="apartment") Квартира
-        //            input#apartment(type="text" name="apartment" placeholder="Введите квартиру")
-        //
-        //        label(for="delivery-date") Дата доставки
-        //        input#delivery-date(type="date" name="deliveryDate" required)
-        //
-        //        label(for="delivery-interval") Интервал доставки
-        //        select#delivery-interval(name="deliveryInterval" required)
-        //            option(value="09:00-12:00") 09:00 - 12:00
-        //            option(value="12:00-15:00") 12:00 - 15:00
-        //            option(value="15:00-18:00") 15:00 - 18:00
-        //
-        //    .cart__section
-        //        h3.cart__subtitle Способ оплаты
-        //        label(for="payment-method") Выберите способ оплаты
-        //        select#payment-method(name="paymentMethod" required)
-        //            option(value="cash" selected) Наличными при получении
-        //            option(value="online") Онлайн
-        //
-        //    button.cart__submit-button(type="submit") Оформить заказ
-        //
-        //script.
-        //    document.querySelector('.cart__form').addEventListener('submit', async (event) => {
-        //        event.preventDefault();
-        //
-        //        const totalSumElement = document.getElementById('total-sum');
-        //        const totalSumText = totalSumElement.textContent.trim();
-        //        const totalSum = parseFloat(totalSumText.replace(/[^0-9.,]/g, '').replace(',', '.'));
-        //
-        //        if (isNaN(totalSum)) {
-        //            alert('Ошибка: Не удалось получить общую сумму заказа.');
-        //            return;
-        //        }
-        //
-        //        const formData = {
-        //            recipientName: document.getElementById('recipient-name')?.value || null,
-        //            recipientPhone: document.getElementById('recipient-phone')?.value || null,
-        //            deliveryType: document.querySelector('input[name="deliveryType"]:checked').value,
-        //            city: document.querySelector('input[name="deliveryType"]:checked').value === 'courier'
-        //                ? document.getElementById('city')?.value || null
-        //                : null,
-        //            street: document.querySelector('input[name="deliveryType"]:checked').value === 'courier'
-        //                ? document.getElementById('street')?.value || null
-        //                : null,
-        //            house: document.querySelector('input[name="deliveryType"]:checked').value === 'courier'
-        //                ? document.getElementById('house')?.value || null
-        //                : null,
-        //            apartment: document.querySelector('input[name="deliveryType"]:checked').value === 'courier'
-        //                ? document.getElementById('apartment')?.value || null
-        //                : null,
-        //            deliveryDate: document.getElementById('delivery-date')?.value,
-        //            deliveryInterval: document.getElementById('delivery-interval')?.value,
-        //            paymentMethod: document.querySelector('select[name="paymentMethod"]').value,
-        //            totalAmount: totalSum,
-        //        };
-        //
-        //        try {
-        //            const response = await fetch('/orders/create', {
-        //                method: 'POST',
-        //                headers: {'Content-Type': 'application/json'},
-        //                body: JSON.stringify(formData),
-        //            });
-        //
-        //            if (response.ok) {
-        //                alert('Заказ успешно создан!');
-        //            } else {
-        //                alert('Ошибка при создании заказа.');
-        //            }
-        //        } catch (error) {
-        //            console.error('Ошибка при отправке данных:', error);
-        //            alert('Не удалось отправить данные на сервер.');
-        //        }
-        //    });
-
-
+                    a(href="/orders" class="cart__button") Оформить заказ
 
 

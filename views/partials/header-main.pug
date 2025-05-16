@@ -1,0 +1,32 @@
+.header__main
+    a.header__logo(href="/")
+        img(src="/images/logo.jpg" alt="Основное изображение логотипа")
+
+    .header__list
+        img#header-list(src="/images/icons/list.svg" alt="Открыть меню" class="header__list-item")
+        img#header-cancel(src="/images/icons/x-lg.svg" alt="Закрыть меню" class="header__list-item")
+
+    nav.header__menu
+        ul.header__menu-list(id="menu-list")
+            li.header__menu-item(id="catalog-item")
+                .header__catalog-item
+                    img(src="/images/icons/list.svg" alt="Меню" class="header__list-icon")
+                    a(href="/catalog" class="header__menu-link") Каталог
+
+    .header__menu-person
+        .header__search-container
+            input(type="text" placeholder="Розы..." class="header__search-input")
+            img(src="/images/icons/search.svg" alt="Поиск" class="header__menu-person-icon")
+
+        a(href="/favorites" class="header__menu-person-link")
+            img(src="/images/icons/heart.svg" alt="" class="header__menu-person-icon")
+            if favoritesCount > 0
+                p.header__menu-person-link-count= favoritesCount
+
+        a(href="/cart", class="header__menu-person-link")
+            img(src="/images/icons/bag.svg", alt="Иконка корзины-сумки", class="header__menu-person-icon")
+            if cartCount > 0
+                p.header__menu-person-link-count.cart-count= cartCount
+
+        a(href=(isAuthenticated ? '/profile' : '/auth/login') class="header__menu-person-link")
+            img(src="/images/icons/person.svg" alt="Иконка личного кабинета" class="header__menu-person-icon")

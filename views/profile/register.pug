@@ -1,25 +1,21 @@
 extends ../layouts/main
 
 block content
-    section.authorization
-        h1.authorization__title Регистрация
-        .authorization__container
-            form#registration-form(action="/auth/register", method="POST")
-                .authorization__option
-                    input(type="text", id="first-name", name="firstName", required, placeholder="Имя")
-
-                    input(type="text", id="last-name", name="lastName", required, placeholder="Фамилия")
-
-                    input(type="email", id="email", name="email", required, placeholder="E-mail")
-
-                    input(type="tel", id="phone", name="phone", required, placeholder="+7 (999) 999-99-99")
-
-                    input(type="password", id="password", name="password", required, placeholder="Пароль")
-
-                    input(type="password", id="confirm-password", name="confirmPassword", required, placeholder="Повторите пароль")
-
-                    .authorization__option-control-group
-                        button(type="submit") Зарегистрироваться
-                        .authorization__option-control
-                            a(href="#") Не помню пароль
-                            a(href="/auth/login") Вход
+    div.wrapper
+        section.authorization
+            h1.authorization__title Регистрация
+            if error
+                .error-message= error
+            .authorization__container
+                form#registration-form(action="/auth/register", method="POST")
+                    .authorization__option
+                        input(type="text", id="first-name", name="firstName", required, placeholder="Имя")
+                        input(type="text", id="last-name", name="lastName", required, placeholder="Фамилия")
+                        input(type="tel", id="phone", name="phone", required, placeholder="Телефон")
+                        input(type="email", id="email", name="email", required, placeholder="E-mail")
+                        input(type="password", id="password", name="password", required, placeholder="Пароль")
+                        .authorization__option-control-group
+                            button(type="submit") Зарегистрироваться
+                            .authorization__option-control
+                                a(href="#") Не помню пароль
+                                a(href="/auth/login") Вход

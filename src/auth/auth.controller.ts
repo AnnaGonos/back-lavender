@@ -1,59 +1,64 @@
-// import { Controller, Post, Body, Get, Render, Redirect } from '@nestjs/common';
-// import { AuthService } from './auth.service';
-// import { RegisterUserDto } from './dto/register.dto';
-// import { LoginUserDto } from './dto/login.dto';
-//
-// @Controller('auth')
-// export class AuthController {
-//     constructor(private readonly authService: AuthService) {}
-//
-//     @Get('login')
-//     @Render('profile/login')
-//     getLoginPage() {
-//         return { pageTitle: 'Вход' };
-//     }
-//
-//     @Get('register')
-//     @Render('profile/register')
-//     getRegisterPage() {
-//         return { pageTitle: 'Регистрация' };
-//     }
-//
-//     @Post('register')
-//     @Redirect('/profile')
-//     async register(@Body() registerUserDto: RegisterUserDto) {
-//         await this.authService.register(registerUserDto);
-//         return { url: '/profile' };
-//     }
-//
-//     @Post('login')
-//     @Redirect('/profile')
-//     async login(@Body() loginUserDto: LoginUserDto) {
-//         const { token } = await this.authService.login(loginUserDto);
-//         return { url: '/profile' };
-//     }
-// }
-//
-//     // @Get('login')
-//     // @Render('profile/login')
-//     // getLoginPage() {
-//     //     return { pageTitle: 'Вход' };
-//     // }
-//     //
-//     // @Get('register')
-//     // @Render('profile/register')
-//     // getRegisterPage() {
-//     //     return { pageTitle: 'Регистрация' };
-//     // }
-//     //
-//     // @Post('register')
-//     // async register(@Body() registerUserDto: RegisterUserDto) {
-//     //     const { token } = await this.authService.register(registerUserDto);
-//     //     return { token };
-//     // }
-//     //
-//     // @Post('login')
-//     // async login(@Body() loginUserDto: LoginUserDto) {
-//     //     const { token } = await this.authService.login(loginUserDto);
-//     //     return { token };
-//     // }
+import {
+    Controller,
+    Post,
+    Body,
+    Res,
+    Get, Render,
+} from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { Response } from 'express';
+
+const cookieOptions = {
+    httpOnly: true,
+    maxAge: 60 * 60 * 1000,
+    path: '/',
+    secure: true,
+    sameSite: 'none' as const,
+};
+
+@Controller('auth')
+export class AuthController {
+    constructor(private authService: AuthService) {}
+
+    @Get('login')
+    @Render('profile/login')
+    async pageLogin() {
+        return {
+            pageTitle: 'Вход'
+        };
+    }
+
+    @Get('register')
+    @Render('profile/register')
+    async pageRegister() {
+        return {
+            pageTitle: 'Регистрация'
+        };
+    }
+
+    @Get('logout')
+    async logout(@Res() res: Response) {
+        res.clearCookie('jwt', cookieOptions);
+        return res.redirect('/auth/login');
+    }
+
+    @Post('register')
+    async registerUser(@Body() dto: RegisterDto, @Res() res: Response) {
+        const { accessToken } = await this.authService.register(dto);
+
+        res.cookie('jwt', accessToken, cookieOptions);
+        return res.redirect('/');
+    }
+
+    @Post('login')
+    async login(@Body() dto: LoginDto, @Res() res: Response) {
+        const { accessToken } = await this.authService.login(dto);
+
+        res.clearCookie('jwt', cookieOptions);
+        res.cookie('jwt', accessToken, cookieOptions);
+
+        return res.redirect('/profile');
+    }
+}

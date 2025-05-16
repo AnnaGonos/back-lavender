@@ -2,59 +2,74 @@ extends layouts/main
 include mixins/backButton
 
 block content
-    if !product
-        span Товар не найден.
-    else
-        section.product-main
-            div.florist__navigation
-                +backButton('/catalog', 'В каталог')
+    div.wrapper
+        if !product
+            section.product-main
+                span Товар не найден.
+        else
+            section.product-main
+                div.florist__navigation
+                    +backButton('/catalog', 'В каталог')
 
-            div.product-main__container
-                div.product-main__gallery
-                    if product.imageUrl
-                        div.gallery-item
-                            img.product-main__gallery-img(src=product.imageUrl alt=product.imageDescription || 'Картинка к товару')
-                            p.gallery-description= product.imageDescription || ''
-                    else
-                        p Нет изображений для этого товара.
-
-                div.product-main__content
-                    h1.product-main__title= product.name
-
-                    div.product-main__prices
-                        if product.discount
-                            span.product-main__price= product.discount + ' РУБ'
-                            span.product-main__price.discount= product.price + ' РУБ'
+                div.product-main__container
+                    div.product-main__gallery
+                        if product.imageUrl
+                            div.gallery-item
+                                img.product-main__gallery-img(src=product.imageUrl alt=product.imageDescription || 'Картинка к товару')
+                                p.gallery-description= product.imageDescription || ''
                         else
-                            span.product-main__price= product.price + ' РУБ'
+                            p Нет изображений для этого товара.
+
+                    div.product-main__content
+                        h1.product-main__title= product.name
+
+                        div.product-main__prices
+                            if product.discount
+                                span.product-main__price= product.discount + ' РУБ'
+                                span.product-main__price.discount= product.price + ' РУБ'
+                            else
+                                span.product-main__price= product.price + ' РУБ'
 
 
-                    div.product-main__description
-                        h5 Состав:
-                        span= product.composition
+                        div.product-main__description
+                            h5 Состав:
+                            span= product.composition
 
-                    div.product-main__template-important
-                        h5 Важно!
-                        span
-                            | Если вы покупаете у нас букет, то стоит помнить, что каждый наш букет уникален. Мы не
-                            | повторяем букеты 1 в 1. Выбирая букет, вы указываете нам свои пожелания в составе,
-                            | цветовой гамме и бюджете. Мы соберем для вас букет и пришлем фото для согласования
-                            | перед отправкой.
+                        div.product-main__template-important
+                            h5 Важно!
+                            span
+                                | Если вы покупаете у нас букет, то стоит помнить, что каждый наш букет уникален. Мы не
+                                | повторяем букеты 1 в 1. Выбирая букет, вы указываете нам свои пожелания в составе,
+                                | цветовой гамме и бюджете. Мы соберем для вас букет и пришлем фото для согласования
+                                | перед отправкой.
 
-                    div.product-main__buttons
-                        button.product-main__button В корзину
-                        button.product-main__button.product-main__button--favorite(
-                            data-product-id=product.id data-in-favorites=product.inFavorites
-                            onclick=`toggleFavorite(${product.id}, this)`)
-                            svg.heart-icon.heart-outline(xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style=product.isFavorite ? 'display: none;' : '')
-                                path(d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15")
-                            svg.heart-icon.heart-fill(xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="red" viewBox="0 0 16 16" style=product.isFavorite ? '' : 'display: none;')
-                                path(d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314")
+                        div.product-main__buttons
+                            div.product__links
+                                if product.quantityInStock > 0
+                                    button.product__link--cart-add.product__link.product__link--cart(
+                                        onclick=`addToCart(${product.id}, this); return false;`
+                                        style=product.inCart ? 'display: none;' : ''
+                                    ) В корзину
+                                    button.product__link.product__link--similar(
+                                        onclick=`goToCart(this); return false;`
+                                        style=product.inCart ? '' : 'display: none;'
+                                    ) В корзине
+                                else
+                                    a(href="/catalog" class="product__link product__link--similar") Товар закончился
 
-                // лайтбокс для увеличения изображений
-                div#lightbox.lightbox
-                    span.close &times;
-                    img.lightbox-content#lightbox-img
-                    p#lightbox-caption
+                            button.product-main__button.product-main__button--favorite(
+                                data-product-id=product.id data-in-favorites=product.inFavorites
+                                onclick=`toggleFavorite(${product.id}, this)`)
+                                svg.heart-icon.heart-outline(xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style=product.isFavorites ? 'display: none;' : '')
+                                    path(d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15")
+                                svg.heart-icon.heart-fill(xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="red" viewBox="0 0 16 16" style=product.isFavorites ? '' : 'display: none;')
+                                    path(d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314")
 
-        script(src="/js/gallery.js" async)
+                    div#lightbox.lightbox
+                        span.close &times;
+                        img.lightbox-content#lightbox-img
+                        p#lightbox-caption
+
+            script(src="/js/gallery.js" async)
+            script(src="/js/toggleFavorite.js")
+            script(src="/js/toggleCart.js")

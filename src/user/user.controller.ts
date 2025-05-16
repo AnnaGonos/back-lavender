@@ -1,55 +1,112 @@
-import {Controller, Get, Render, UseGuards, Request, Body, Post, Redirect} from '@nestjs/common';
-import {UserService} from "./user.service";
-import {RegisterUserDto} from "./dto/register.dto";
-import {LoginUserDto} from "./dto/login.dto";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Redirect,
+  Render,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import { UserService } from './user.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { OrderService } from '../order/order.service';
+import { ApiExcludeController } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/auth.guard';
 
-@Controller("auth")
+@Controller('profile')
+@UseGuards(JwtAuthGuard)
+@ApiExcludeController()
 export class UserController {
-    constructor(private readonly userService: UserService) {
-    }
+  constructor(
+    private readonly userService: UserService,
+    private readonly orderService: OrderService,
+  ) {}
 
-    @Get('login')
-    @Render('profile/login') // Страница входа
-    getLoginPage() {
-        return { pageTitle: 'Вход' };
-    }
+  @Get()
+  @Render('profile/profile')
+  async getProfilePage(@Request() req) {
+    const userId = req.user.id;
 
-    @Get('register')
-    @Render('profile/register') // Страница регистрации
-    getRegisterPage() {
-        return { pageTitle: 'Регистрация' };
-    }
+    const user = await this.userService.findOne(userId);
 
-    @Post('register')
-    @Redirect('/profile') // Редирект на страницу профиля
-    async register(@Body() registerUserDto: RegisterUserDto) {
-        await this.userService.register(registerUserDto);
+    return {
+      user,
+      pageTitle: 'Личный кабинет',
+    };
+  }
 
-    }
+  @Get('/myorders')
+  @Render('profile/all-orders')
+  async allOrdersPage(@Request() req) {
+    const userId = req.user.id;
 
+    const user = await this.userService.findOne(userId);
+    const orders = await this.orderService.findOrdersByUserId(userId);
+
+    return {
+      pageTitle: 'Мои заказы',
+      user,
+      orders,
+      getOrderStatus: this.orderService.getOrderStatus.bind(this.orderService),
+      getDeliveryType: this.orderService.getDeliveryType.bind(
+        this.orderService,
+      ),
+    };
+  }
+
+  @Get('/myorders/:id')
+  @Render('orders/order-details')
+  async orderDetailsPage(@Param('id', ParseIntPipe) orderId: number, @Request() req) {
+    const userId = req.user.id;
+
+    const user = await this.userService.findOne(userId);
+    const order = await this.orderService.getOrderItems(orderId);
+
+    return {
+      pageTitle: `Заказ №${order.id}`,
+      user,
+      order,
+      getOrderStatus: this.orderService.getOrderStatus.bind(this.orderService),
+      getDeliveryType: this.orderService.getDeliveryType.bind(
+        this.orderService,
+      ),
+    };
+  }
+
+  @Get('edit')
+  @Render('profile/profile-edit')
+  async getEditProfilePage(@Request() req) {
+    const userId = req.user.id;
+    const user = await this.userService.findOne(userId);
+
+    return {
+      user,
+      pageTitle: 'Редактирование личных данных',
+    };
+  }
+
+  @Get('bonus-card')
+  @Render('profile/bonus-card')
+  async getBonusCardPage(@Request() req) {
+    const userId = req.user.id;
+    const user = await this.userService.findOne(userId);
+    const loyaltyInfo = await this.userService.calculateLoyaltyLevel(user);
+
+    return {
+      user,
+      loyaltyLevel: loyaltyInfo.level,
+      bonusPercentage: loyaltyInfo.bonusPercentage,
+      pageTitle: 'Бонусная карта',
+    };
+  }
+
+  @Patch('edit')
+  @Redirect('/profile')
+  async updateProfile(@Body() updateUserDto: UpdateUserDto, @Request() req) {
+    const userId = req.user.id;
+    await this.userService.update(userId, updateUserDto);
+  }
 }
-
-    // @Get('login')
-    // @Render('profile/login')
-    // getLoginPage() {
-    //     return { pageTitle: 'Вход' };
-    // }
-    //
-    // @Get('register')
-    // @Render('profile/register')
-    // getRegisterPage() {
-    //     return { pageTitle: 'Регистрация' };
-    // }
-    //
-    // @Post('register')
-    // async register(@Body() registerUserDto: RegisterUserDto) {
-    //     const { token } = await this.authService.register(registerUserDto);
-    //     return { token }; // Возвращаем JWT
-    // }
-    //
-    // @Post('login')
-    // async login(@Body() loginUserDto: LoginUserDto) {
-    //     const { token } = await this.authService.login(loginUserDto);
-    //     return { token }; // Возвращаем JWT
-    // }
-

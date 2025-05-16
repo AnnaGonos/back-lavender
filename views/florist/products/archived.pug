@@ -2,33 +2,15 @@ extends ../../layouts/main
 include ../../mixins/backButton
 
 block content
-    section.products
-        div.florist__navigation
-            +backButton('/florist/products', 'Назад')
+    div.wrapper
+        section.products
+            div.florist__navigation
+                +backButton('/florist/products', 'Назад')
 
-        h1.products__title= pageTitle
+            h1.products__title= pageTitle
 
-        div.products-florist__container
-            if products && products.length > 0
-                each product in products
-                    div.products-florist__item
-                        div.products-florist__content
-                            img(src=product.imageUrl alt=product.name class="products-florist__img")
-                            div.products__description
-                                h5= product.name
-                                if product.discount > 0
-                                    div.product-florist__prices
-                                        span.product-main__price= product.discount + ' ₽'
-                                        span.product-main__price.discount= product.price + ' ₽'
-                                else
-                                    div.product-florist__prices-florist
-                                        span.product-main__price= product.price + ' ₽'
-                                span= `${product.quantityInStock} шт`
+            div.products-florist__container#archived-products-container
+                p Загрузка товаров...
 
-                        div.products-florist__modify
-                            a(href=`/florist/products/${product.id}/edit` class="categories__edit-button") Редактировать
-                            form#delete-form(action=`/florist/products/${product.id}?_method=DELETE` method="POST")
-                                button.products__delete-button(type="submit") Удалить
 
-            else
-                p Архивированных товаров пока нет.
+    script(src="/js/archived-product.js")

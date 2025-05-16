@@ -15,9 +15,6 @@ mixin cart-item(item)
                 else
                     span.cart__price= item.product.price + ' ₽'
             .cart__actions
-                img.cart__icon(src="/images/icons/x-lg.svg", alt="", data-product-id=item.product.id)
+                img.cart__icon(src="/images/icons/x-lg.svg", alt="", data-product-id=item.product.id, class="remove-btn")
         hr.cart__divider
 
-
-    script(src="/js/cartActions.js" async)
-    script(src="/js/updateCartItem.js" async)

@@ -2,47 +2,82 @@ extends ../../layouts/main
 include ../../mixins/backButton
 
 block content
-    section.products
-        div.florist__navigation
-            +backButton('/florist/products', 'Назад')
+    div.wrapper
+        section.products
+            div.florist__navigation
+                +backButton('/florist/products', 'Назад')
 
-        h1.products__title= pageTitle
+            h1.products__title= pageTitle
 
-        form.products__form(action="/florist/products/add" method="POST" enctype="multipart/form-data")
-            label(for="name") Название
-            input#name(type="text" name="name" required placeholder="Введите название товара")
+            form.products__form(action="/florist/products/add" method="POST" enctype="multipart/form-data")
+                label(for="name") Название
+                input#name(type="text" name="name" required placeholder="Введите название товара")
 
-            label(for="description") Описание
-            textarea#description(name="description" placeholder="Добавить описание (не обязательно)")
+                label(for="description") Описание
+                textarea#description(name="description" placeholder="Добавить описание (не обязательно)")
 
-            label(for="composition") Состав
-            input#composition(type="text" name="composition" placeholder="Введите состав товара")
+                label(for="composition") Состав
+                input#composition(type="text" name="composition" placeholder="Введите состав товара")
 
-            label(for="price") Цена
-            input#price(type="number" name="price" step="0.01" required placeholder="Введите цену товара")
+                label(for="price") Цена
+                input#price(type="number" name="price" step="0.01" required placeholder="Введите цену товара")
 
-            label(for="discount") Цена со скидкой
-            input#discount(type="number" name="discount" step="0.01" placeholder="Введите скидку (по умолчанию 0)")
+                label(for="discount") Цена со скидкой
+                input#discount(type="number" name="discount" step="0.01" placeholder="Введите скидку (по умолчанию 0)")
 
-            label(for="quantityInStock") Количество в магазине
-            input#quantityInStock(type="number" name="quantityInStock" required placeholder="Введите количество на складе")
+                label(for="quantityInStock") Количество в магазине
+                input#quantityInStock(type="number" name="quantityInStock" required placeholder="Введите количество на складе")
 
-            label(for="categoryName") Категория
-            select#categoryName(name="categoryName" required)
-                option(value="" disabled selected) Выберите категорию
-                if categories && categories.length > 0
-                    each category in categories
-                        option(value=category.name)= category.name
-                else
-                    option(disabled) Нет доступных категорий
+                label(for="categoryName") Категория
+                select#categoryName(name="categoryName" required)
+                    option(value="" disabled selected) Выберите категорию
+                    if categories && categories.length > 0
+                        each category in categories
+                            option(value=category.name)= category.name
+                    else
+                        option(disabled) Нет доступных категорий
 
-            div.images-container
-                span Добавить изображение
-                label(for="image") Изображение
-                input#image(type="file"  name="image" accept="image/*")
+                div.images-container
+                    span Добавить изображение
+                    label(for="image") Изображение
+                    input#image(type="file"  name="image" accept="image/*")
 
-                label(for="imageDescription") Описание изображения
-                textarea#imageDescription(name="imageDescription" placeholder="Добавьте описание изображения")
+                    label(for="imageDescription") Описание изображения
+                    textarea#imageDescription(name="imageDescription" placeholder="Добавьте описание изображения")
 
-            button.product-main__button(type="submit") Сохранить товар
+                button.product-main__button(type="submit") Сохранить товар
 
+        script.
+          document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('.products__form');
+            const discountInput = document.getElementById('discount');
+
+            form.addEventListener('submit', async function(e) {
+              e.preventDefault();
+
+              if (!discountInput.value.trim()) {
+                discountInput.value = '0';
+              }
+
+              const formData = new FormData(form);
+
+              try {
+                const response = await fetch(form.getAttribute('action'), {
+                  method: 'POST',
+                  body: formData
+                });
+
+                if (response.redirected) {
+                  window.location.href = response.url;
+                } else if (response.ok) {
+                  window.location.href = '/florist/products';
+                } else {
+                  const errorText = await response.text();
+                  alert('Ошибка при добавлении товара: ' + errorText);
+                }
+              } catch (error) {
+                console.error(error);
+                alert('Произошла сетевая ошибка.');
+              }
+            });
+          });

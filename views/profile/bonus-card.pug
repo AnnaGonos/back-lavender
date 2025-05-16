@@ -1,25 +1,26 @@
 extends ../layouts/main
 
 block content
-    section.profile
-        h1.profile__title Личный кабинет
+    div.wrapper
+        section.profile
+            h1.profile__title Личный кабинет
 
-        .profile__content
-            include ../partials/profile-sidebar
-                - const user = locals.user
+            .profile__content
+                include ../partials/profile-sidebar
+                    - const user = locals.user
 
-            div.profile__content-right_card
-                h4.profile__title Программа лояльности
-                div.profile__content-right_card-item
-                    div.profile__content-right_card-item-header
-                        img(src="/images/logo.jpg" alt="Основное изображение логотипа" class="profile__content-right_card-item-image")
-                        div.profile__content-right_card-item-coins
-                            span Монеты
-                            span= user.bonusPoints || 0
-                    div.profile__content-right_card-item-body
-                        div.profile__content-right_card-item-comment
-                            span Уровень
-                            h4= loyaltyLevel.levelName || 'Неизвестный уровень'
-                        span= loyaltyLevel.bonusPercentage + '%' || '0%'
+                div.profile__content-right_card
+                    h4.profile__title Программа лояльности
+                    div.profile__content-right_card-item
+                        div.profile__content-right_card-item-header
+                            img(src="/images/logo.jpg" alt="Основное изображение логотипа" class="profile__content-right_card-item-image")
+                            div.profile__content-right_card-item-coins
+                                span Монеты
+                                span= user.bonusPoints || 0
+                        div.profile__content-right_card-item-body
+                            div.profile__content-right_card-item-comment
+                                span Уровень
+                                h4= locals.loyaltyLevel || 'Неизвестный уровень'
+                            span= `${locals.bonusPercentage}%` || '0%'
 
-                p.profile__content-right_card-description Подробности для системы начисления бонусов и повышения уровней
+                    p.profile__content-right_card-description Подробности для системы начисления бонусов и повышения уровней

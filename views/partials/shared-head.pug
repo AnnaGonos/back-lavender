@@ -1,32 +1,12 @@
 link(href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap", rel="stylesheet")
 link(rel="stylesheet", href="/css/outlines.css")
 link(rel="icon", type="image/png", href="/images/logotype.jpg")
-link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css")
+script(src="https://cdn.jsdelivr.net/npm/toastify-js ")
+link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css ")
 
-script(src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js")
-script(src="/js/eventsToastr.js")
-
-script(src="/js/favorite-heart.js" async)
-script(src="/js/toggleCart.js" async)
 script(src="/js/dropdown-menu.js")
 script(src="/js/menuList.js")
 script(src="/js/activeMenu.js")
 script(src="/js/messenger.js")
-script.
-    toastr.options = {
-        closeButton: true,
-        progressBar: true,
-        positionClass: 'toast-top-right',
-    };
-
-    // Подключение к серверу через SSE
-    const eventSource = new EventSource('/products/events');
-
-    eventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        toastr.info(data.message, 'Обновление');
-    };
-
-    eventSource.onerror = () => {
-        console.error('Ошибка соединения SSE');
-    };
+script(src="/js/toggleCart.js")
+script(src="/js/toggleFavorite.js")

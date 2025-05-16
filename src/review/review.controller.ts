@@ -1,54 +1,73 @@
-import {Controller, Get, Post, Patch, Delete, Param, Body, Res, Render} from '@nestjs/common';
-import { Response } from 'express';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  Render,
+  UseInterceptors,
+  UploadedFile,
+  Patch, ParseIntPipe,
+} from '@nestjs/common';
 import { ReviewService } from './review.service';
-import { Review } from './entities/review.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { fileUploadConfig } from './file-upload.config';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { UpdateReviewDto } from './dto/update-review.dto';
+import {UserService} from "../user/user.service";
+import { ApiExcludeController } from '@nestjs/swagger';
 
 @Controller('reviews')
+@ApiExcludeController()
 export class ReviewController {
-    constructor(private readonly reviewService: ReviewService) {}
+  constructor(private readonly reviewService: ReviewService,
+              private readonly userService: UserService)
+  {}
 
-    @Get()
-    @Render('reviews/all-reviews')
-    async findAll() {
-        const reviews = await this.reviewService.findAll();
-        return { pageTitle: 'Все отзывы', reviews };
-    }
+  @Get()
+  @Render('reviews/all')
+  async findAll() {
+    const userId = 1;
+    const user = await this.userService.findOne(userId);
+    const reviews = await this.reviewService.findAll();
+    return {
+      pageTitle: 'Отзывы заказчиков', reviews, user
+    };
+  }
 
-    @Get(':id')
-    @Render('reviews/review-details')
-    async findOne(@Param('id') id: string) {
-        const review = await this.reviewService.findOne(parseInt(id, 10));
-        return { pageTitle: `Отзыв №${review.id}`, review };
-    }
+  @Get('add')
+  @Render('reviews/add')
+  async getAddReviewPage() {
+    return {
+      pageTitle: 'Добавить отзыв'
+    };
+  }
 
-    @Post()
-    async create(@Body() createReviewDto: Partial<Review>, @Res() res: Response) {
-        await this.reviewService.create(createReviewDto);
-        return res.redirect('/reviews');
-    }
+  @Post('/add')
+  @UseInterceptors(FileInterceptor('image', fileUploadConfig))
+  async createReview(
+    @Body() createReviewDto: CreateReviewDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const userId = 1;
+    const imagePath = file ? `/uploads/reviews/${file.filename}` : undefined;
 
-    @Patch(':id')
-    async update(@Param('id') id: string, @Body() updateReviewDto: Partial<Review>, @Res() res: Response) {
-        await this.reviewService.update(parseInt(id, 10), updateReviewDto);
-        return res.redirect(`/reviews/${id}`);
-    }
+    return this.reviewService.create(createReviewDto, +userId, imagePath);
+  }
 
-    @Delete(':id')
-    async remove(@Param('id') id: string, @Res() res: Response) {
-        await this.reviewService.remove(parseInt(id, 10));
-        return res.redirect('/reviews');
-    }
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.reviewService.findOne(id);
+  }
 
-    @Get('/add')
-    @Render('reviews/add-review')
-    addReviewPage() {
-        return { pageTitle: 'Добавить отзыв' };
-    }
+  @Patch(':id')
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateReviewDto: UpdateReviewDto) {
+    await this.reviewService.update(id, updateReviewDto);
+  }
 
-    @Get(':id/edit')
-    @Render('reviews/edit-review')
-    async editReviewPage(@Param('id') id: string) {
-        const review = await this.reviewService.findOne(parseInt(id, 10));
-        return { pageTitle: `Изменить отзыв №${review.id}`, review };
-    }
+  @Delete(':id')
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return await this.reviewService.remove(id);
+  }
 }

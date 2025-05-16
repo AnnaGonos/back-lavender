@@ -4,36 +4,37 @@ include ../../mixins/order-items
 include ../../mixins/backButton
 
 block content
-    section.profile
-        h1.profile__title Личный кабинет
-        div.florist__navigation
-            +backButton('/florist', 'Назад')
-            +backButton('/florist/products', 'Товары')
+    div.wrapper
+        section.profile
+            h1.profile__title Личный кабинет
+            div.florist__navigation
+                +backButton('/florist', 'Назад')
+                +backButton('/florist/products', 'Товары')
 
-        div.profile__content-right_card
-            h1.cart__title Все заказы
-            div.order__container.order__container--lk
-                div.order__top
-                    span Номер заказа
-                    span Дата доставки
-                    span Интервал доставки
-                    span Сумма заказа
-                    span Статус заказа
-                    span Тип доставки
-                    span Адрес доставки
+            div.profile__content-right_card
+                h1.cart__title Все заказы
+                div.order__container.order__container--lk
+                    div.order__top
+                        span Номер заказа
+                        span Дата доставки
+                        span Интервал доставки
+                        span Сумма заказа
+                        span Статус заказа
+                        span Тип доставки
+                        span Адрес доставки
 
-                div.order__bottom
-                    if orders && orders.length > 0
-                        each order in orders
-                            a(href=`/florist/orders/${order.id}`, class="order__bottom-item")
-                                span= order.id
-                                span= order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long'}) : 'Не указана'
-                                span= order.deliveryInterval || 'Не указан'
-                                span= `${order.totalAmount} ₽`
-                                span= getOrderStatus(order.status)
-                                span= getDeliveryType(order.deliveryType)
-                                span= order.deliveryAddress || 'Не указан'
+                    div.order__bottom
+                        if orders && orders.length > 0
+                            each order in orders
+                                a(href=`/florist/orders/${order.id}`, class="order__bottom-item")
+                                    span= order.id
+                                    span= order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long'}) : 'Не указана'
+                                    span= order.deliveryInterval || 'Не указан'
+                                    span= `${order.totalAmount} ₽`
+                                    span= getOrderStatus(order.status)
+                                    span= getDeliveryType(order.deliveryType)
+                                    span= order.deliveryAddress || 'Не указан'
 
-                    else
-                        div.order__bottom-item
-                            span(colspan="7") Нет заказов.
+                        else
+                            div.order__bottom-item
+                                span(colspan="7") Нет заказов.

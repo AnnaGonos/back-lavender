@@ -1,24 +1,24 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import { Controller, Get, Render, Req, UseFilters, UseInterceptors } from '@nestjs/common';
 import {ProductService} from "./product/product.service";
+import {ApiExcludeController} from "@nestjs/swagger";
+import {AllExceptionsFilter} from "./all.exception.filter";
 
 @Controller()
+@UseFilters(AllExceptionsFilter)
+@ApiExcludeController()
 export class AppController {
   constructor(private readonly productService: ProductService) {}
 
-  @Get()
+  @Get(["/index", ""])
   @Render('index')
-  async getBaseInfo() {
-    const products = await this.productService.findLatestOnlineProducts();
-    console.log('Products:', products);
-
+  async getBaseInfo(@Req() req) {
     return {
-      user: null,
+      user: req.user,
       // user: { name: 'Гонос Анна' },
       metaKeywords: 'цветы, букеты, онлайн витрина, купить цветы',
       metaDescription:
         'Онлайн витрина цветов и букетов. Заберите ваш заказ прямо из магазина.',
       pageTitle: 'Заказать букет цветов с доставкой на дом в Партизанске',
-      products,
       slides: [
         {
           images: [
@@ -75,7 +75,7 @@ export class AppController {
       ],
       catalogItems: [
         {
-          category: 'Все букеты',
+          category: '',
           image: 'images/flowers/14.41.13_a908f0ff.jpg',
           alt: 'Раздел все букеты',
           name: 'Все букеты',
@@ -87,7 +87,7 @@ export class AppController {
           name: 'Цветочные композиции',
         },
         {
-          category: 'Моно и дуобукеты',
+          category: 'Монобукеты',
           image: 'images/flowers/14.30.42_85b4cd55.jpg',
           alt: 'Раздел моно и дуобукеты',
           name: 'Моно и дуобукеты',
@@ -115,129 +115,11 @@ export class AppController {
     };
   }
 
-  // @Get('login')
-  // @Render('login')
-  // login() {
-  //   return { user: { name: 'Гонос Анна' } };
-  // }
-  //
-  // @Get('register')
-  // @Render('register')
-  // register() {
-  //   return {};
-  // }
-
-  // @Get('profile')
-  // @Render('profile')
-  // profile() {
-  //   return { user: { name: 'Гонос Анна' } };
-  // }
-
-  @Get('online-display')
-  @Render('online-display')
-  getOnlineShowcase() {
+  @Get('florist')
+  @Render('florist/florist')
+  getFloristPage() {
     return {
-      metaKeywords: 'цветы, букеты, онлайн витрина, купить цветы',
-      metaDescription:
-        'Онлайн витрина цветов и букетов. Заберите ваш заказ прямо из магазина.',
-      pageTitle: 'Онлайн витрина | Магазин цветов',
-      products: [
-        {
-          image: 'images/flowers/14.23.41_fce727b1.jpg',
-          name: 'Букет №122',
-          price: '3200',
-        },
-        {
-          image: 'images/flowers/11.31.00_f360ef16.jpg',
-          name: 'Композиция №2',
-          price: '3500',
-        },
-        {
-          image: 'images/flowers/11.31.00_f360ef16.jpg',
-          name: 'Букет №239',
-          price: '3500',
-        },
-      ],
-    };
-  }
-
-  @Get('blog')
-  @Render('blog')
-  getPost() {
-    return {
-      metaKeywords:
-        'цветы, букеты, посты, блог, блог магазина цветов, купить цветы',
-      metaDescription: 'Цветочный блог магазина Лаванда',
-      pageTitle: 'Цветочный блог магазина Лаванда | Магазин цветов',
-      blogPosts: [
-        {
-          link: 'blog-new-year.html',
-          image: 'images/flowers/17.36.41_ead8dd0e.jpg',
-          alt: 'Заставка для статьи в разделе блог 1',
-          date: '01.01.2025',
-          title:
-            'Зимняя сказка в ваших домах: новогодние композиции от магазина цветов "Лаванда"',
-        },
-        {
-          link: '#',
-          image: 'images/flowers/14.23.42_37825df9.jpg',
-          alt: 'Заставка для статьи в разделе блог 2',
-          date: '22.12.2024',
-          title: 'Цветы как подарок: что выбрать?',
-        },
-        {
-          link: '#',
-          image: 'images/flowers/14.23.15_599df81f.jpg',
-          alt: 'Заставка для статьи в разделе блог 3',
-          date: '21.12.2024',
-          title: 'Наши любимые цветочные композиции',
-        },
-        {
-          link: '#',
-          image: 'images/flowers/14.33.51_048e7fe8.jpg',
-          alt: 'Заставка для статьи в разделе блог 4',
-          date: '01.10.2024',
-          title: 'Что подарить любимому учителю?',
-        },
-        {
-          link: '#',
-          image: 'images/flowers/03.19.46_f3b4b6b7.jpg',
-          alt: 'Заставка для статьи в разделе блог 5',
-          date: '01.03.2023',
-          title: 'Как выбрать подарок на 8 марта?',
-        },
-      ],
-    };
-  }
-
-  @Get('review')
-  @Render('review')
-  getReview() {
-    return {
-      metaKeywords:
-        'цветы, букеты, онлайн витрина, купить цветы, отзывы заказчиков',
-      metaDescription: 'Отзывы заказчиков. Магазин цветов Лаванда.',
-      pageTitle: 'Отзывы заказчиков',
-      reviews: [
-        {
-          name: 'Екатерина',
-          date: '21.10.2023',
-          comment: 'Спасибо за прекрасный букет!',
-          image: 'images/flowers/00.50.42_bb95d805.jpg',
-        },
-        {
-          name: 'Лидия',
-          date: '12.11.2024',
-          comment: 'Спасибо за прекрасный букет!',
-          image: 'images/flowers/09.06.55_4bffe7ff.jpg',
-        },
-        {
-          name: 'Мария',
-          date: '02.03.2024',
-          comment: 'Спасибо за прекрасный букет!',
-          image: 'images/flowers/14.33.52_ae79da06.jpg',
-        },
-      ],
+      pageTitle: 'Аккаунт флориста'
     };
   }
 

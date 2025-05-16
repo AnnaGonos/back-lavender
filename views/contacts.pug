@@ -1,19 +1,18 @@
 extends layouts/main
 
-include mixins/products-mini
-
 block content
-    section.contacts
-        .contacts__header
-            h1.catalog__title= pageTitle
-            p.contacts_comment Мы на связи с 8 до 19
+    div.wrapper
+        section.contacts
+            .contacts__header
+                h1.catalog__title= pageTitle
+                p.contacts_comment Мы на связи с 8 до 19
 
-        .contacts__content
-            .contacts__content-messengers
-                each item in [{ title: 'Телефон', link: 'tel:+79146627911', text: '+7 914 662-79-11' }, { title: 'Telegram', link: 'https://t.me/lavandapartizansk', text: '@lavandapartizansk' }, { title: 'WhatsApp', link: 'https://wa.me/79146627911?text=Здравствуйте', text: '+7 914 662-79-11' }, { title: 'Instagram*', link: 'https://www.instagram.com/lavanda_prt/', text: '@lavanda_prt' }]
-                    .contacts__content-item
-                        p.contacts__content-item-title= item.title
-                        a.contacts__content-item-text(href=item.link, target="_blank")= item.text
+            .contacts__content
+                .contacts__content-messengers
+                    each item in [{ title: 'Телефон', link: 'tel:+79146627911', text: '+7 914 662-79-11' }, { title: 'Telegram', link: 'https://t.me/lavandapartizansk', text: '@lavandapartizansk' }, { title: 'WhatsApp', link: 'https://wa.me/79146627911?text=Здравствуйте', text: '+7 914 662-79-11' }, { title: 'Instagram*', link: 'https://www.instagram.com/lavanda_prt/', text: '@lavanda_prt' }]
+                        .contacts__content-item
+                            p.contacts__content-item-title= item.title
+                            a.contacts__content-item-text(href=item.link, target="_blank")= item.text
 
-            iframe.contacts__content-map(
-                src="https://yandex.ru/map-widget/v1/?um=constructor%3A553a221d0932d5f6c59c850a9b5ed024b9c6bd9da578afc16a1073d2649342bf&amp;source=constructor", width="100%", height="500", frameborder="0")
+                iframe.contacts__content-map(
+                    src="https://yandex.ru/map-widget/v1/?um=constructor%3A553a221d0932d5f6c59c850a9b5ed024b9c6bd9da578afc16a1073d2649342bf&amp;source=constructor", width="100%", height="500", frameborder="0")
