@@ -1,0 +1,96 @@
+extends ../layouts/main
+include ../mixins/cart-item
+
+block content
+    div.wrapper
+        section.cart
+            h1.cart__title= pageTitle
+
+            form.cart__registration#orderForm(action="/orders/create", method="POST")
+                div.cart__registration-contacts
+                    h3.cart__title Контактные данные
+                    div.cart__contacts-container
+                        h4 Ваши данные
+                        div.cart__input-groups
+                            span.cart__input-group-item= user.firstName
+                            span.cart__input-group-item= user.phone
+                            span.cart__input-group-item= user.email
+                    div.cart__contacts-container
+                        h4 Данные получателя
+                        span Если доставку получаете вы, то эти данные не заполняйте
+                        div.cart__input-groups
+                            label(for="recipientName")
+                                input.cart__input-group-item(type="text", class="form-control", id="recipientName",
+                                    placeholder="Имя получателя", name="recipientName")
+                            label(for="recipientPhone")
+                                input.cart__input-group-item(type="tel", class="form-control", id="recipientPhone",
+                                    name="recipientPhone", placeholder="Телефон получателя")
+
+                div.cart__registration-delivery
+                    h3.cart__title Доставка
+                    h4 Способ доставки
+                    div.cart__delivery-options
+                        label
+                        select.cart__input-group-item(class="form-select", id="deliveryType", name="deliveryType", required)
+                            option(value="COURIER" selected) Курьерская доставка
+                            option(value="PICKUP") Самовывоз
+                    div.cart__delivery-date#deliveryDetails(style="display: flex;")
+                        div.cart__input-groups.cart__input-groups--date
+                            label(for="deliveryDate") Выберите дату
+                            input.cart__input-group-item(type="date", class="form-control", id="deliveryDate", name="deliveryDate", required)
+                        div.cart__input-groups.cart__input-groups--date
+                            label(for="deliveryInterval") Выберите интервал получения
+                            select.cart__input-group-item(class="form-select", id="deliveryInterval", name="deliveryInterval", required)
+                                option(value="09:00-12:00") 09:00 - 12:00
+                                option(value="12:00-15:00") 12:00 - 15:00
+                                option(value="15:00-18:00") 15:00 - 18:00
+
+                    div.cart__delivery-address
+                        h4 Адрес доставки
+                        span Введите адрес, укажите так же дом и квартиру
+                        div.cart__input-groups
+                            label(for="deliveryAddress")
+                                input.cart__input-group-item(id="deliveryAddress", name="deliveryAddress", type="text", placeholder="Введите адрес")
+
+
+
+                div.cart__registration-payment
+                    h3.cart__title Оплата
+                    div.cart__payment-options
+                        label Способ оплаты
+                        select.cart__input-group-item(class="form-select", id="paymentMethod", name="paymentMethod", required)
+                            option(value="CASH") Наличными
+                            option(value="ONLINE") Онлайн
+                    div.cart__payment-options
+                        label.cart__title Бонусные баллы
+                        div.cart__payment-bonus
+                            span Монеты на вашем счете:
+                            span#availableBonus #{availableBonus}
+                        div.cart__payment-options
+                            label
+                                input.cart__input-group-item(type="radio", name="bonusAction", value="accumulate" checked)
+                                | Копить бонусы
+                        div.cart__payment-options
+                            label
+                                input.cart__input-group-item(type="radio", name="bonusAction", value="spend")
+                                | Списать все бонусы
+
+                div.cart__decoration.cart__decoration--order
+                    h3.cart__title Итого
+                    div.cart__sum
+                        span Стоимость товаров
+                        span#totalItemsCost #{originalSum} ₽
+                    div.cart__sum
+                        span Стоимость доставки
+                        span#deliveryCost 0 ₽
+                    div.cart__sum
+                        h5 Итоговая сумма
+                        span#finalTotal #{originalSum} ₽
+
+                input(type="hidden", name="finalTotal", id="finalTotalInput")
+                div.cart__payment-bot
+                    button.cart__button(type="submit") Оформить заказ
+                    span.cart__payment-comment Нажимая продолжить я даю своё согласие на обработку персональных данных в соответствии с Политикой конфиденциальности
+
+            script(src="/js/orderCreate.js" defer)
+

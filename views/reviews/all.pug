@@ -1,0 +1,35 @@
+extends ../layouts/main
+include ../mixins/review-item
+
+block content
+    div.wrapper
+        section.reviews
+            div.reviews__header
+                h1.reviews__title Отзывы заказчиков
+                p.reviews__comment Ваши отзывы - делают нас лучше и помогают другим клиентам сделать свой выбор
+
+            a(href="reviews/add", class="reviews__button")
+                img(src="/images/icons/emoji-laughing.svg", alt="", class="reviews__icon")
+                span Оставить отзыв
+
+            div.reviews__content
+                if reviews && reviews.length > 0
+                    each review in reviews
+                        +reviewItem(review)
+                else
+                    p Нет отзывов.
+
+
+            div#response-modal.modal.hidden
+                div.modal__content
+                    h3 Ответить на отзыв
+                    form#response-form
+                        label(for="response-text") Ваш ответ:
+                        textarea#response-text(name="response" rows="4" placeholder="Введите ваш ответ...").modal__textarea
+                        div.modal__buttons
+                            button(type="submit" class="modal__button modal__button--primary") Отправить
+                            button(type="button" id="cancel-response" class="modal__button modal__button--secondary") Отмена
+
+            div#overlay.overlay.hidden
+
+        script(src="/js/toggleReviews.js")

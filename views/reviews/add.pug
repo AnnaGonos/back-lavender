@@ -1,0 +1,22 @@
+extends ../layouts/main
+
+block content
+    div.wrapper
+        section.reviews__add
+            h1.reviews__title Добавить отзыв
+            form.reviews__form(action="/reviews/add" method="POST" enctype="multipart/form-data")
+                label.reviews__label(for="rating") Оценка:
+                select#rating.reviews__input(name="rating" required)
+                    option(value="5") 5
+                    option(value="4") 4
+                    option(value="3") 3
+                    option(value="2") 2
+                    option(value="1") 1
+
+                label.reviews__label(for="description") Описание:
+                textarea#description.reviews__input(name="description" placeholder="Расскажите о вашем опыте")
+
+                label.reviews__label(for="image") Загрузить фото:
+                input#image.reviews__input(type="file" name="image" accept="image/*")
+
+                button.reviews__button(type="submit") Отправить отзыв
